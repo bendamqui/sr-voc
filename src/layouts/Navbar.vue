@@ -5,15 +5,6 @@
       <li class="nav-item">
         <b-button
           size="sm"
-          @click.prevent="importData"
-          variant="info"
-          class="mt-1 mr-2"
-          ><b-icon icon="upload" aria-label="Help"></b-icon> Import</b-button
-        >
-      </li>
-      <li class="nav-item">
-        <b-button
-          size="sm"
           @click.prevent="exportData"
           variant="success"
           class="mt-1"
