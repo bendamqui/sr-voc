@@ -1,6 +1,8 @@
 <template>
   <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">SrVoc v0.1.4</a>
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#"
+      >SrVoc v{{ version }}</a
+    >
     <ul class="navbar-nav nav-actions px-3">
       <li class="nav-item">
         <b-button
@@ -21,8 +23,12 @@ import { format } from "date-fns";
 const { dialog } = remote;
 import { exportData } from "@/modules/exportData";
 import { importData } from "@/modules/importData";
+import { version } from "@/../package.json";
 
 export default {
+  data: () => ({
+    version: version
+  }),
   methods: {
     importData() {
       dialog.showOpenDialog({}).then(({ canceled, filePaths }) => {

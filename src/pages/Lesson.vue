@@ -9,6 +9,12 @@
           <b-form-group>
             <b-form-input placeholder="target" v-model="editPayload.target" />
           </b-form-group>
+          <b-form-group>
+            <b-form-input
+              placeholder="pronunciation"
+              v-model="editPayload.pronunciation"
+            />
+          </b-form-group>
           <b-button type="submit" class="d-none" />
         </b-form>
       </p>
@@ -17,7 +23,7 @@
     <div
       class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom"
     >
-      <h1 class="h2">{{ lesson.name }}</h1>
+      <h1 class="h2">{{ lesson.name }} ({{ words.length }} words)</h1>
       <div class="btn-toolbar mb-2 mb-md-0">
         <b-button variant="info" class="mr-2" v-b-modal.full-screen-modal
           >Learn</b-button
@@ -146,8 +152,8 @@ export default {
     },
     showEditModal(item) {
       this.$bvModal.show("edit-word-modal");
-      const { id, source, target } = item;
-      this.editPayload = { id, source, target };
+      const { id, source, target, pronunciation } = item;
+      this.editPayload = { id, source, pronunciation, target };
     },
     handleEditWord() {
       this.updateWord({

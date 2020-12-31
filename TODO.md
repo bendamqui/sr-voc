@@ -5,8 +5,10 @@
 
 # Backlog
 - [ ] fix the app icon (build/icon.icns)
-- [ ] Show number of words in lessons/words
 - [ ] Allow synonyms
 - [ ] Increase font size
 - [ ] Review difficult words
-- [ ] Edit pronunciation
+- [ ] Fix non-reactive date, probably cause by directive
+- [ ] Sort words by level
+- [ ] Analytics
+- [ ] Import
