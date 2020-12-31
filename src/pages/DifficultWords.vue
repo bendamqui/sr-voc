@@ -3,7 +3,10 @@
     <div
       class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom"
     >
-      <h1 class="h2">Difficult Words ({{ words.length }})</h1>
+      <h1 class="h2">
+        Difficult Words
+        <b-badge variant="success" pill>{{ words.length }}</b-badge>
+      </h1>
     </div>
     <div class="row">
       <div class="col-12">
@@ -27,21 +30,23 @@
 import { mapActions, mapGetters } from "vuex";
 export default {
   created() {
-    this.loadWords();
+    this.loadDifficultWords().then(() => {
+      console.log(this.words);
+    });
   },
   data() {
     return {
       checked: [],
       payload: { source: "", target: "", pronunciation: "" },
       fields: [
-        "id",
         "source",
         "target",
         "pronunciation",
         "level",
         "lastAttempt",
-        "createdAt",
-        "updatedAt"
+        "success",
+        "attempts",
+        "ratio"
       ]
     };
   },
@@ -49,7 +54,7 @@ export default {
     ...mapGetters("words", ["words"])
   },
   methods: {
-    ...mapActions("words", ["loadWords"])
+    ...mapActions("words", ["loadDifficultWords"])
   }
 };
 </script>

@@ -19,6 +19,9 @@ const actions = {
   loadWords({ commit }) {
     return Word.select().then(docs => commit("setWords", docs));
   },
+  loadDifficultWords({ commit }) {
+    return Word.selectDifficult().then(docs => commit("setWords", docs));
+  },
   loadWordsToReviewCount({ commit }) {
     return Word.selectWordsToReview().then(words =>
       commit("setWordsToReviewCount", words.length)
