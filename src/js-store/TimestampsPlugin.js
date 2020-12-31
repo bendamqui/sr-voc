@@ -9,6 +9,9 @@ const setCreatedAt = date => document => ({
 export const TimeStampPlugin = {
   setup: function(connection) {
     connection.addMiddleware((request, next) => {
+      if (request.noTimestamps === true) {
+        return next();
+      }
       if (
         request.name === "insert" &&
         Schema.getTable(request.query.into).useTimestamps()

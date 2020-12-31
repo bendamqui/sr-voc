@@ -19,7 +19,9 @@ import { format } from "date-fns";
   Vue.config.productionTip = false;
   Vue.directive("date", {
     bind(el, binding) {
-      el.innerHTML = format(binding.value, "yyyy-MM-dd HH:mm:ss");
+      if (binding.value) {
+        el.innerHTML = format(binding.value, "yyyy-MM-dd HH:mm:ss");
+      }
     }
   });
   connection.addPlugin(TimeStampPlugin);
