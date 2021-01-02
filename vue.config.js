@@ -9,7 +9,7 @@ module.exports = {
   },
   configureWebpack: {
     externals: {
-      sequelize: "require('sequelize')"
+      /*sequelize: "require('sequelize')"*/
     }
   }
 };
