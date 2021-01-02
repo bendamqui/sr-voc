@@ -31,10 +31,7 @@
         <b-button variant="info" class="mr-2" v-b-modal.full-screen-modal
           >Learn</b-button
         >
-        <b-button
-          @click="deleteWords(checked)"
-          variant="danger"
-          class="float-right"
+        <b-button @click="handleDeleteWord" variant="danger" class="float-right"
           ><b-icon-trash
         /></b-button>
       </div>
@@ -65,6 +62,19 @@
             <b-icon-plus-circle />
           </b-button>
         </form>
+      </div>
+      <div class="col-4">
+        <b-form @submit.prevent="handleSearch" class="form-inline float-right">
+          <b-form-input
+            type="text"
+            v-model="search"
+            class="mr-2"
+            placeholder="Search to Dictionary"
+          />
+          <b-button type="submit" variant="success" class="float-right">
+            <b-icon-search />
+          </b-button>
+        </b-form>
       </div>
     </div>
     <div class="row">
@@ -115,6 +125,7 @@ export default {
   data() {
     return {
       lesson: {},
+      search: "",
       checked: [],
       payload: { source: "", target: "", pronunciation: "" },
       editPayload: {},
@@ -148,20 +159,29 @@ export default {
           : [];
     },
     handleSubmit() {
-      this.createWord({ ...this.payload, lessonId: this.id }).then(() => {
+      this.createWord({ ...this.payload, LessonId: this.id }).then(() => {
         this.payload = { source: "", target: "", pronunciation: "" };
         this.$refs.source.focus();
       });
+    },
+    handleSearch() {
+      console.log(this.search);
     },
     showEditModal(item) {
       this.$bvModal.show("edit-word-modal");
       const { id, source, target, pronunciation } = item;
       this.editPayload = { id, source, pronunciation, target };
     },
+    handleDeleteWord() {
+      this.deleteWords({
+        ids: this.checked,
+        LessonId: this.id
+      });
+    },
     handleEditWord() {
       this.updateWord({
         ...this.editPayload,
-        lessonId: this.id
+        LessonId: this.id
       });
       this.$bvModal.hide("edit-word-modal");
     }

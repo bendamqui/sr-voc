@@ -1,5 +1,5 @@
-import { Lesson } from "@/js-store/lesson";
-import { Word } from "@/js-store/word";
+import { Lesson, Word } from "@/sqlite";
+import { Op } from "sequelize";
 
 const state = () => ({
   lessons: []
@@ -18,10 +18,10 @@ const getters = {
 
 const actions = {
   loadLessons({ commit }) {
-    return Lesson.select().then(lessons => commit("setLessons", lessons));
+    return Lesson.findAll().then(lessons => commit("setLessons", lessons));
   },
   createLesson({ dispatch }, payload) {
-    return Lesson.insert(payload).then(() => {
+    return Lesson.create(payload).then(() => {
       dispatch("loadLessons");
     });
   },
@@ -31,13 +31,11 @@ const actions = {
     );
   },
   deleteLessons({ dispatch }, ids) {
-    return Lesson.remove({ where: { id: { in: ids } } })
-      .then(() => {
-        return Word.remove({ where: { lessonId: { in: ids } } });
-      })
-      .then(() => {
+    return Word.destroy({ where: { LessonId: { [Op.in]: ids } } }).then(() => {
+      return Lesson.destroy({ where: { id: { [Op.in]: ids } } }).then(() => {
         dispatch("loadLessons");
       });
+    });
   }
 };
 

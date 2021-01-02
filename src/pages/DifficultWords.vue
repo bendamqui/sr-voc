@@ -5,12 +5,12 @@
     >
       <h1 class="h2">
         Difficult Words
-        <b-badge variant="success" pill>{{ words.length }}</b-badge>
+        <b-badge variant="success" pill>{{ difficultWords.length }}</b-badge>
       </h1>
     </div>
     <div class="row">
       <div class="col-12">
-        <b-table :items="words" :fields="fields">
+        <b-table :items="difficultWords" :fields="fields">
           <template #cell(lastAttempt)="data">
             <span v-date="data.value"> </span>
           </template>
@@ -30,9 +30,7 @@
 import { mapActions, mapGetters } from "vuex";
 export default {
   created() {
-    this.loadDifficultWords().then(() => {
-      console.log(this.words);
-    });
+    this.loadDifficultWords();
   },
   data() {
     return {
@@ -43,15 +41,14 @@ export default {
         "target",
         "pronunciation",
         "level",
-        "lastAttempt",
-        "success",
-        "attempts",
-        "ratio"
+        "Results.success",
+        "Results.attempts",
+        "Results.ratio"
       ]
     };
   },
   computed: {
-    ...mapGetters("words", ["words"])
+    ...mapGetters("words", ["difficultWords"])
   },
   methods: {
     ...mapActions("words", ["loadDifficultWords"])

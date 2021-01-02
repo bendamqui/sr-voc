@@ -6,5 +6,10 @@ module.exports = {
         publish: ["github"]
       }
     }
+  },
+  configureWebpack: {
+    externals: {
+      sequelize: "require('sequelize')"
+    }
   }
 };

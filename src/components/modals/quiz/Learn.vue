@@ -53,15 +53,13 @@ import QuizInput from "@/components/modals/quiz/QuizInput";
 import { createQuiz } from "@/modules/quiz";
 import { DIRECTION, QUESTION_TYPE } from "@/modules/quiz/types";
 import { arrayIterator } from "@/utils/iterators";
-import { Result } from "@/js-store/result";
-import { Word } from "@/js-store/word";
-import { Lesson } from "@/js-store/lesson";
+import { Result, Word, Lesson } from "@/sqlite";
 
 const saveResult = (question, result) => {
-  Result.insert({
-    wordId: question.id,
+  Result.create({
+    WordId: question.id,
     type: "learn",
-    result: result === true ? 1 : 0
+    result: result
   });
 };
 
@@ -74,7 +72,7 @@ export default {
     }
   },
   beforeCreate() {
-    this.$root.$on("bv::modal::show", async (bvEvent, modalId) => {
+    this.$root.$on("bv::modal::show", (bvEvent, modalId) => {
       if (modalId === "full-screen-modal") {
         this.start();
       }
@@ -156,7 +154,10 @@ export default {
   },
   methods: {
     async start() {
-      this.words = await Word.select({ where: { lessonId: this.lessonId } });
+      this.words = await Word.findAll({
+        where: { LessonId: this.lessonId },
+        raw: true
+      });
       this.finished = false;
       this.steps.reset();
       this.progress.reset();
@@ -172,7 +173,8 @@ export default {
       }
       if (this.steps.hasMore()) {
         this.quiz = createQuiz(this.words, this.steps.next());
-        return (this.question = this.quiz.next());
+        this.question = this.quiz.next();
+        return this.question;
       }
       this.finished = true;
       if (this.isLessonCompleted) {
@@ -181,13 +183,13 @@ export default {
     },
 
     async onComplete() {
-      const lesson = await Lesson.findById(this.lessonId);
-      if (lesson.completed !== 1) {
+      const lesson = await Lesson.findByPk(this.lessonId);
+      if (lesson.completed !== true) {
         Word.update(
           { lastAttempt: new Date(), level: 1 },
-          { where: { lessonId: this.lessonId } }
+          { where: { LessonId: this.lessonId } }
         ).then(() => {
-          Lesson.update({ completed: 1 }, { where: { id: this.lessonId } });
+          Lesson.update({ completed: true }, { where: { id: this.lessonId } });
         });
       }
     },

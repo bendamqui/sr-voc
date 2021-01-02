@@ -1,14 +1,18 @@
-import { connection } from "@/js-store";
-import { Word } from "@/js-store/word";
+import { Op } from "sequelize";
+import { Word } from "@/sqlite";
 
 const state = () => ({
   words: [],
+  difficultWords: [],
   wordsToReviewCount: 0
 });
 
 const getters = {
   words(state) {
     return state.words;
+  },
+  difficultWords(state) {
+    return state.difficultWords;
   },
   wordsToReviewCount(state) {
     return state.wordsToReviewCount;
@@ -17,43 +21,46 @@ const getters = {
 
 const actions = {
   loadWords({ commit }) {
-    return Word.select().then(docs => commit("setWords", docs));
+    return Word.findAll().then(docs => commit("setWords", docs));
   },
   loadDifficultWords({ commit }) {
-    return Word.selectDifficult().then(docs => commit("setWords", docs));
-  },
-  loadWordsToReviewCount({ commit }) {
-    return Word.selectWordsToReview().then(words =>
-      commit("setWordsToReviewCount", words.length)
+    return Word.selectDifficult().then(docs =>
+      commit("setDifficultWords", docs)
     );
   },
-  loadLessonWords({ commit }, lessonId) {
-    return connection
-      .select({ from: "words", where: { lessonId } })
-      .then(docs => commit("setWords", docs));
+  loadWordsToReviewCount({ commit }) {
+    return Word.selectWordsToReview().then(words => {
+      commit("setWordsToReviewCount", words.length);
+    });
   },
-  updateWord({ dispatch }, { lessonId, id, ...payload }) {
+  loadLessonWords({ commit }, lessonId) {
+    return Word.findAll({ where: { lessonId } }).then(docs =>
+      commit("setWords", docs)
+    );
+  },
+  updateWord({ dispatch }, { LessonId, id, ...payload }) {
     return Word.update(payload, { where: { id } }).then(() =>
-      dispatch("loadLessonWords", lessonId)
+      dispatch("loadLessonWords", LessonId)
     );
   },
   createWord({ dispatch }, payload) {
-    return connection
-      .insert({ into: "words", values: [payload] })
-      .then(() => dispatch("loadLessonWords", payload.lessonId));
+    return Word.create(payload).then(() =>
+      dispatch("loadLessonWords", payload.LessonId)
+    );
   },
-  deleteWords({ dispatch }, ids) {
-    return connection
-      .remove({ from: "words", where: { id: { in: ids } } })
-      .then(() => {
-        dispatch("loadWords");
-      });
+  deleteWords({ dispatch }, { ids, LessonId }) {
+    return Word.destroy({ where: { id: { [Op.in]: ids } } }).then(() => {
+      dispatch("loadLessonWords", LessonId);
+    });
   }
 };
 
 const mutations = {
   setWords(state, words) {
     state.words = words;
+  },
+  setDifficultWords(state, words) {
+    state.difficultWords = words;
   },
   setWordsToReviewCount(state, count) {
     state.wordsToReviewCount = count;

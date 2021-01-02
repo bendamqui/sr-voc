@@ -30,6 +30,11 @@ const routes = [
         component: () => import("@/pages/DifficultWords")
       },
       {
+        path: "/dictionary",
+        name: "dictionary",
+        component: () => import("@/pages/Dictionary")
+      },
+      {
         path: "/example",
         name: "example",
         component: () => import("@/pages/Example")

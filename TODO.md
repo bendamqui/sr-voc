@@ -2,13 +2,15 @@
 - [ ] Clean up quiz vue code
 - [ ] Improve QCM ui
 - [ ] Write tests
+- [ ] Consolidate json properties case on import/export
 
 # Backlog
 - [ ] fix the app icon (build/icon.icns)
-- [ ] Allow synonyms
+- [ ] Accept synonyms
 - [ ] Increase font size
-- [ ] Review difficult words
+- [ ] difficult words quiz
 - [ ] Fix non-reactive date, probably cause by directive
 - [ ] Sort words by level
 - [ ] Analytics
-- [ ] Import
+- [ ] Check for updates, setInterval
+- [ ] Logging

@@ -32,8 +32,7 @@ import ProgressBar from "@/components/ProgressBar";
 import QuizInput from "@/components/modals/quiz/QuizInput";
 import { createQuiz } from "@/modules/quiz";
 import { DIRECTION, QUESTION_TYPE } from "@/modules/quiz/types";
-import { Word } from "@/js-store/word";
-import { Result } from "@/js-store/result";
+import { Word, Result } from "@/sqlite";
 import { mapActions } from "vuex";
 
 export default {
@@ -131,10 +130,10 @@ export default {
       }
     },
     saveResult(question, success) {
-      Result.insert({
-        wordId: question.id,
+      Result.create({
+        WordId: question.id,
         type: "review",
-        result: success === true ? 1 : 0
+        result: success
       });
       Word.update(
         { lastAttempt: new Date(), level: success ? question.level + 1 : 1 },

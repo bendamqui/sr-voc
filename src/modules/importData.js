@@ -1,51 +1,32 @@
 import fs from "fs";
-import { Lesson } from "@/js-store/lesson";
-import { Word } from "@/js-store/word";
-import { Result } from "@/js-store/result";
-import { Schema } from "@/js-store/schema";
+import { Lesson } from "@/sqlite";
+import { Word } from "@/sqlite";
+import { Result } from "@/sqlite";
 
 export const importData = async ([file]) => {
-  const { words, lessons, results } = JSON.parse(fs.readFileSync(file));
-  const resources = [
-    {
-      table: "lessons",
-      data: lessons,
-      model: Lesson,
-      dateColumns: ["createdAt", "updatedAt"]
-    },
-    {
-      table: "words",
-      data: words,
-      model: Word,
-      dateColumns: ["createdAt", "updatedAt", "lastAttempt"]
-    },
-    {
-      table: "results",
-      data: results,
-      model: Result,
-      dateColumns: ["createdAt", "updatedAt"]
-    }
-  ];
+  await Result.destroy({ where: {} });
+  await Word.destroy({ where: {} });
+  await Lesson.destroy({ where: {} });
 
-  resources.forEach(({ table, model, dateColumns, data }) => {
-    Schema.getTable(table).timestamps = false;
-    model.remove().then(() => {
-      model
-        .insert(
-          data.map(stringToDate(["updatedAt", "createdAt", ...dateColumns]))
-        )
-        .finally(() => (Schema.getTable(table).timestamps = true));
-    });
-  });
-};
-
-const stringToDate = columns => {
-  return item => {
-    columns.forEach(column => {
-      if (item[column] !== null) {
-        item[column] = new Date(item[column]);
-      }
-    });
-    return item;
-  };
+  const { lessons, words, results } = JSON.parse(
+    fs.readFileSync(file, "utf-8")
+  );
+  await Lesson.bulkCreate(lessons);
+  await Word.bulkCreate(
+    words.map(word => {
+      return {
+        ...word,
+        LessonId: word.lessonId
+      };
+    })
+  );
+  await Result.bulkCreate(
+    results.map(result => {
+      return {
+        ...result,
+        WordId: result.wordId
+      };
+    })
+  );
+  console.log("handle import");
 };
