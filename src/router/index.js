@@ -45,6 +45,12 @@ const routes = [
         component: () => import("@/pages/Texts")
       },
       {
+        path: "/text",
+        name: "text",
+        props: true,
+        component: () => import("@/pages/Text")
+      },
+      {
         path: "/create-text",
         name: "createText",
         props: true,

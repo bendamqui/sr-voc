@@ -13,6 +13,9 @@ const getters = {
     return id => {
       return state.lessons.find(lesson => lesson.id === id);
     };
+  },
+  lessonOptions(state) {
+    return state.lessons.map(({ id, name }) => ({ id, name }));
   }
 };
 

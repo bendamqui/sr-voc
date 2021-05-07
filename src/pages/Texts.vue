@@ -27,10 +27,9 @@
             <b-checkbox @change="toggleCheckAll" />
           </template>
           <template #cell(title)="data">
-            <router-link
-              :to="{ name: 'lesson', params: { id: data.item.id } }"
-              >{{ data.value }}</router-link
-            >
+            <router-link :to="{ name: 'text', params: { id: data.item.id } }">{{
+              data.value
+            }}</router-link>
           </template>
           <template #cell(id)="data">
             <b-checkbox v-model="checked" :value="data.value" />

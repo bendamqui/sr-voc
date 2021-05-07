@@ -1,4 +1,11 @@
 import Vue from "vue";
+
+import VueQuillEditor from "vue-quill-editor";
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
+import "quill/dist/quill.bubble.css";
+
+import "vue-multiselect/dist/vue-multiselect.min.css";
 import App from "@/App.vue";
 import router from "@/router";
 import store from "@/store";
@@ -16,8 +23,10 @@ import { sequelize, sync } from "./sqlite";
     .then(() => console.log("authenticated to sqlite"))
     .catch(err => console.log(err));
   await sync();
+
   Vue.use(BootstrapVue);
   Vue.use(IconsPlugin);
+  Vue.use(VueQuillEditor /* { default global options } */);
   Vue.config.productionTip = false;
 
   Vue.directive("date", {

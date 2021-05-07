@@ -3,7 +3,7 @@ import Vuex from "vuex";
 import lessons from "@/store/modules/lessons";
 import words from "@/store/modules/words";
 import dictionary from "@/store/modules/dictionary";
-import texts from "./modules/texts";
+import texts from "@/store/modules/texts";
 
 Vue.use(Vuex);
 

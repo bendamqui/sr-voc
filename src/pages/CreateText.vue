@@ -17,7 +17,7 @@
       <div class="row">
         <div class="col-md-12">
           <b-form-group label="Content">
-            <b-form-textarea rows="18" v-model="payload.content" />
+            <quill-editor :auto-height="false" v-model="payload.content" />
           </b-form-group>
         </div>
       </div>

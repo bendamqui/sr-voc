@@ -32,7 +32,7 @@ Result.belongsTo(Word);
 const createSync = (...models) => {
   return () => {
     const promises = models.map(model => {
-      return model.sync({ alter: true });
+      return model.sync({ alter: false });
     });
     return Promise.all(promises);
   };
