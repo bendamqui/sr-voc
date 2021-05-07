@@ -45,7 +45,7 @@ export default {
   },
   created() {
     if (this.isUpdate) {
-      this.payload = this.text(this.id).dataValues;
+      this.payload = this.text(this.id);
     }
   },
   data: () => ({

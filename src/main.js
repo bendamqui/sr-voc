@@ -32,7 +32,7 @@ import { sequelize, sync } from "./sqlite";
   Vue.directive("date", {
     bind(el, binding) {
       if (binding.value) {
-        el.innerHTML = format(binding.value, "yyyy-MM-dd HH:mm:ss");
+        el.innerHTML = format(new Date(binding.value), "yyyy-MM-dd HH:mm:ss");
       }
     }
   });

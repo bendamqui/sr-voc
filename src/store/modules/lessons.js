@@ -21,7 +21,9 @@ const getters = {
 
 const actions = {
   loadLessons({ commit }) {
-    return Lesson.findAll().then(lessons => commit("setLessons", lessons));
+    return Lesson.findAll({ raw: true }).then(lessons =>
+      commit("setLessons", lessons)
+    );
   },
   createLesson({ dispatch }, payload) {
     return Lesson.create(payload).then(() => {

@@ -6,6 +6,7 @@
       <h1 class="h2">
         Words <b-badge variant="success" pill>{{ words.length }}</b-badge>
       </h1>
+
       <div class="btn-toolbar mb-2 mb-md-0">
         <b-button
           @click="deleteWords(checked)"
@@ -24,15 +25,6 @@
           <template #cell(id)="data">
             <b-checkbox v-model="checked" :value="data.value" />
           </template>
-          <template #cell(lastAttempt)="data">
-            <span v-date="data.value"> </span>
-          </template>
-          <template #cell(createdAt)="data">
-            <span v-date="data.value"> </span>
-          </template>
-          <template #cell(updatedAt)="data">
-            <span v-date="data.value"> </span>
-          </template>
         </b-table>
       </div>
     </div>
@@ -41,6 +33,8 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
+import { formatDate } from "@/utils/date";
+
 export default {
   created() {
     this.loadWords();
@@ -51,13 +45,13 @@ export default {
       payload: { source: "", target: "", pronunciation: "" },
       fields: [
         "id",
-        "source",
-        "target",
-        "pronunciation",
-        "level",
-        "lastAttempt",
-        "createdAt",
-        "updatedAt"
+        { key: "source", sortable: true },
+        { key: "target", sortable: true },
+        { key: "pronunciation", sortable: true },
+        { key: "level", sortable: true },
+        { key: "lastAttempt", sortable: true, formatter: formatDate },
+        { key: "createdAt", sortable: true, formatter: formatDate },
+        { key: "updatedAt", sortable: true, formatter: formatDate }
       ]
     };
   },

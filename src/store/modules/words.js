@@ -21,7 +21,7 @@ const getters = {
 
 const actions = {
   loadWords({ commit }) {
-    return Word.findAll().then(docs => commit("setWords", docs));
+    return Word.findAll({ raw: true }).then(docs => commit("setWords", docs));
   },
   loadDifficultWords({ commit }) {
     return Word.selectDifficult().then(docs =>
@@ -34,7 +34,7 @@ const actions = {
     });
   },
   loadLessonWords({ commit }, lessonId) {
-    return Word.findAll({ where: { lessonId } }).then(docs =>
+    return Word.findAll({ raw: true, where: { lessonId } }).then(docs =>
       commit("setWords", docs)
     );
   },
