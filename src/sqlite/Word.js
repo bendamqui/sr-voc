@@ -23,7 +23,10 @@ export const createWord = sequelize => {
           { level: 5, lastAttempt: { [Op.lt]: subDays(new Date(), 14) } },
           { level: 6, lastAttempt: { [Op.lt]: subDays(new Date(), 30) } },
           { level: 7, lastAttempt: { [Op.lt]: subDays(new Date(), 90) } },
-          { level: 8, lastAttempt: { [Op.lt]: subDays(new Date(), 180) } }
+          {
+            level: { [Op.gt]: 7 },
+            lastAttempt: { [Op.lt]: subDays(new Date(), 120) }
+          }
         ]
       },
       raw: true
