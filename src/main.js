@@ -8,14 +8,14 @@ import "bootstrap-vue/dist/bootstrap-vue.css";
 import "./assets/dashboard.css";
 import { mapActions } from "vuex";
 import { format } from "date-fns";
-import { sequelize } from "@/sqlite";
+import { sequelize, sync } from "./sqlite";
 
 (async () => {
   await sequelize
     .authenticate()
     .then(() => console.log("authenticated to sqlite"))
     .catch(err => console.log(err));
-
+  await sync();
   Vue.use(BootstrapVue);
   Vue.use(IconsPlugin);
   Vue.config.productionTip = false;

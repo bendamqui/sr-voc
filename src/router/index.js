@@ -40,6 +40,17 @@ const routes = [
         component: () => import("@/pages/Example")
       },
       {
+        path: "/texts",
+        name: "texts",
+        component: () => import("@/pages/Texts")
+      },
+      {
+        path: "/create-text",
+        name: "createText",
+        props: true,
+        component: () => import("@/pages/CreateText")
+      },
+      {
         path: "/sandbox",
         name: "sandbox",
         component: () => import("@/pages/Sandbox")
