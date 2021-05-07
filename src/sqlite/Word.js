@@ -47,7 +47,7 @@ export const createWord = sequelize => {
         model: Result
       },
       where: { level: { [Op.in]: [1, 2] } },
-      having: { "`Results.ratio`": { [Op.lt]: 90 } },
+      having: { "`Results.ratio`": { [Op.lt]: 80 } },
       group: "Word.id",
       raw: true
     });
