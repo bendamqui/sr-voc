@@ -50,13 +50,6 @@
           <template #cell(id)="data">
             <b-checkbox v-model="checked" :value="data.value" />
           </template>
-
-          <template #cell(createdAt)="data">
-            <span v-date="data.value"> </span>
-          </template>
-          <template #cell(updatedAt)="data">
-            <span v-date="data.value"> </span>
-          </template>
           <template #cell(Actions)="{item}">
             <b-button
               @click="showEditModal(item)"
@@ -74,7 +67,7 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-
+import { formatDate } from "@/utils/date";
 export default {
   created() {
     this.loadLessons();
@@ -84,7 +77,14 @@ export default {
       checked: [],
       payload: { name: "" },
       editPayload: { name: "" },
-      fields: ["id", "name", "completed", "createdAt", "updatedAt", "Actions"]
+      fields: [
+        "id",
+        { key: "name", sortable: true },
+        { key: "completed", sortable: true },
+        { key: "createdAt", sortable: true, formatter: formatDate },
+        { key: "updatedAt", sortable: true, formatter: formatDate },
+        "Actions"
+      ]
     };
   },
   computed: {

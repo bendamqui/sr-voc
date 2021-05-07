@@ -10,17 +10,7 @@
     </div>
     <div class="row">
       <div class="col-12">
-        <b-table :items="difficultWords" :fields="fields">
-          <template #cell(lastAttempt)="data">
-            <span v-date="data.value"> </span>
-          </template>
-          <template #cell(createdAt)="data">
-            <span v-date="data.value"> </span>
-          </template>
-          <template #cell(updatedAt)="data">
-            <span v-date="data.value"> </span>
-          </template>
-        </b-table>
+        <b-table :items="difficultWords" :fields="fields" />
       </div>
     </div>
   </div>
@@ -37,13 +27,13 @@ export default {
       checked: [],
       payload: { source: "", target: "", pronunciation: "" },
       fields: [
-        "source",
-        "target",
-        "pronunciation",
-        "level",
-        "Results.success",
-        "Results.attempts",
-        "Results.ratio"
+        { key: "source", sortable: true },
+        { key: "target", sortable: true },
+        { key: "pronunciation", sortable: true },
+        { key: "level", sortable: true },
+        { key: "Results.success", label: "Success", sortable: true },
+        { key: "Results.attempts", label: "Attempts", sortable: true },
+        { key: "Results.ratio", label: "Ratio %", sortable: true }
       ]
     };
   },

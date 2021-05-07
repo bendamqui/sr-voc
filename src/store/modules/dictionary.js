@@ -13,7 +13,8 @@ const getters = {
 const actions = {
   search({ commit }, query) {
     return DictionaryWord.findAll({
-      where: { target: query }
+      where: { target: query },
+      raw: true
     }).then(words => commit("setWords", words));
   }
 };

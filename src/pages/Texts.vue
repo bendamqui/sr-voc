@@ -34,13 +34,6 @@
           <template #cell(id)="data">
             <b-checkbox v-model="checked" :value="data.value" />
           </template>
-
-          <template #cell(createdAt)="data">
-            <span v-date="data.value"> </span>
-          </template>
-          <template #cell(updatedAt)="data">
-            <span v-date="data.value"> </span>
-          </template>
           <template #cell(Actions)="{item}">
             <router-link :to="{ name: 'createText', params: { id: item.id } }">
               <b-button size="sm" variant="warning" class="mt-1 mr-2 text-white"
@@ -56,6 +49,7 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
+import { formatDate } from "@/utils/date";
 
 export default {
   created() {
@@ -66,7 +60,13 @@ export default {
       checked: [],
       payload: { title: "" },
       editPayload: { title: "" },
-      fields: ["id", "title", "createdAt", "updatedAt", "Actions"]
+      fields: [
+        "id",
+        { key: "title", sortable: true },
+        { key: "createdAt", sortable: true, formatter: formatDate },
+        { key: "updatedAt", sortable: true, formatter: formatDate },
+        "Actions"
+      ]
     };
   },
   computed: {

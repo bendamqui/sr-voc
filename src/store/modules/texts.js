@@ -18,7 +18,7 @@ const getters = {
 
 const actions = {
   loadTexts({ commit }) {
-    return Text.findAll().then(texts => commit("setTexts", texts));
+    return Text.findAll({ raw: true }).then(texts => commit("setTexts", texts));
   },
   createText({ dispatch }, payload) {
     return Text.create(payload).then(() => {
