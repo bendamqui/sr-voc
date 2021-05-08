@@ -17,6 +17,17 @@
         <li class="nav-item">
           <router-link
             active-class="active"
+            to="/dashboard"
+            class="nav-link"
+            href="#"
+          >
+            <span data-feather="home"></span>
+            Dashboard <span class="sr-only">(current)</span>
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <router-link
+            active-class="active"
             to="/lessons"
             class="nav-link"
             href="#"
