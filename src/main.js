@@ -4,8 +4,8 @@ import VueQuillEditor from "vue-quill-editor";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import "quill/dist/quill.bubble.css";
-
 import "vue-multiselect/dist/vue-multiselect.min.css";
+import "chartjs-plugin-colorschemes";
 import App from "@/App.vue";
 import router from "@/router";
 import store from "@/store";
