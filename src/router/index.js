@@ -5,7 +5,7 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: "/",
-    redirect: "/lessons",
+    redirect: "/dashboard",
     component: () => import("@/layouts/DefaultLayout"),
     children: [
       {
@@ -38,6 +38,12 @@ const routes = [
         path: "/example",
         name: "example",
         component: () => import("@/pages/Example")
+      },
+      {
+        path: "/dashboard",
+        name: "dashboard",
+        props: true,
+        component: () => import("@/pages/Dashboard")
       },
       {
         path: "/texts",

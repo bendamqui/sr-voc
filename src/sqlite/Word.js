@@ -33,6 +33,15 @@ export const createWord = sequelize => {
     });
   };
 
+  model.wordsByLevel = () => {
+    return model.findAll({
+      attributes: [[sequelize.literal("count(*)"), "count"], "level"],
+      group: "level",
+      order: [["level", "asc"]],
+      raw: true
+    });
+  };
+
   model.selectDifficult = () => {
     return model.findAll({
       include: {
