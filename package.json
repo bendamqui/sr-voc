@@ -1,7 +1,9 @@
 {
   "name": "sr-voc",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "private": false,
+  "description": "Learn vocabulary using spaced repetition algorithm",
+  "author": "bendamqui@icloud.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/bendamqui/sr-voc.git"
