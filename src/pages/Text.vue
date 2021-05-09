@@ -107,8 +107,14 @@ export default {
         this.$bvModal.show("wiktionary-modal");
       }
     },
+
     showAddToLessonModal() {
-      this.payload.target = this.search;
+      this.payload = {
+        ...this.payload,
+        source: "",
+        pronunciation: "",
+        target: this.search
+      };
       this.$bvModal.hide("wiktionary-modal");
       this.$bvModal.show("add-to-lesson-modal");
     },
