@@ -7,6 +7,7 @@ import { createLesson } from "@/sqlite/Lesson";
 import { createWord } from "@/sqlite/Word";
 import { createResult } from "@/sqlite/Result";
 import { createText } from "@/sqlite/Text";
+import { createAnnotation } from "@/sqlite/Annotation";
 
 const storage = `${app.getPath("userData")}/${process.env.NODE_ENV}.sqlite`;
 console.log(`connection to sqlite with file -> ${storage}`);
@@ -23,11 +24,14 @@ const Lesson = createLesson(sequelize);
 const Word = createWord(sequelize);
 const Result = createResult(sequelize);
 const Text = createText(sequelize);
+const Annotation = createAnnotation(sequelize);
 
 Lesson.hasMany(Word);
 Word.belongsTo(Lesson);
 Word.hasMany(Result);
 Result.belongsTo(Word);
+Text.hasMany(Annotation);
+Annotation.belongsTo(Text);
 
 const createSync = (...models) => {
   return () => {
@@ -38,6 +42,15 @@ const createSync = (...models) => {
   };
 };
 
-const sync = createSync(Lesson, Word, Result, Text);
+const sync = createSync(Lesson, Word, Result, Text, Annotation);
 
-export { sequelize, sync, DictionaryWord, Lesson, Word, Result, Text };
+export {
+  sequelize,
+  sync,
+  DictionaryWord,
+  Lesson,
+  Word,
+  Result,
+  Text,
+  Annotation
+};
