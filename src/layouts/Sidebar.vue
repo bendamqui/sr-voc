@@ -80,7 +80,7 @@
             Texts <span class="sr-only">(current)</span>
           </router-link>
         </li>
-        <li class="nav-item">
+        <!--        <li class="nav-item">
           <router-link
             active-class="active"
             to="/sandbox"
@@ -90,7 +90,7 @@
             <span data-feather="home"></span>
             Sandbox <span class="sr-only">(current)</span>
           </router-link>
-        </li>
+        </li>-->
       </ul>
     </div>
   </nav>
