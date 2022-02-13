@@ -1,17 +1,51 @@
 <template>
   <div>
+    <b-modal
+      class="mh-100"
+      size="lg"
+      id="show-annotation-modal"
+      :title="annotation.selector"
+      cancel-title="Delete"
+      cancel-variant="danger"
+      @cancel="handleDeleteAnnotation"
+    >
+      <div v-html="annotation.content"></div>
+    </b-modal>
+    <b-modal
+      class="mh-100"
+      size="lg"
+      id="annotation-modal"
+      title="Annotate"
+      @ok="handleSaveAnnotation"
+    >
+      <form @submit.prevent="handleSaveAnnotation">
+        <b-form-group>
+          <b-form-textarea
+            rows="10"
+            v-model="annotationPayload.content"
+          ></b-form-textarea>
+        </b-form-group>
+      </form>
+    </b-modal>
     <b-modal class="mh-100" size="lg" id="wiktionary-modal" title="Wiktionary">
       <template #modal-footer>
-        <!-- Emulate built in modal footer ok and cancel button actions -->
-        <b-button variant="info" @click="showAddToLessonModal">
+        <b-button variant="primary" @click="showAddToLessonModal">
           Add to lesson
         </b-button>
-        <!-- Button with custom close trigger value -->
+        <b-button
+          variant="info"
+          @click="
+            $bvModal.hide('wiktionary-modal');
+            $bvModal.show('annotation-modal');
+          "
+        >
+          Annotate
+        </b-button>
       </template>
       <div class="row">
         <iframe
           class="col-md-12"
-          v-if="search !== ''"
+          v-if="selection !== ''"
           :src="searchUrl"
         ></iframe>
       </div>
@@ -62,10 +96,24 @@
         /></b-button>
       </div>
     </div>
+
     <div class="row">
+      <TextContextMenu
+        v-if="contextMenu.show"
+        :x="contextMenu.x"
+        :y="contextMenu.y"
+        @search-wiktionary="handleSearchOnWiktionary"
+        @annotate="
+          $bvModal.show('annotation-modal');
+          contextMenu.show = false;
+        "
+        @cancel="contextMenu.show = false"
+      />
+
       <div
-        @mouseup="translate"
+        @mouseup="showContextMenu"
         id="selectable"
+        ref="selectable"
         v-html="text(id).content"
         class="col-md-12 font-size-lg"
       ></div>
@@ -74,46 +122,148 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { annotateNode } from "@/utils/annotations";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import Multiselect from "vue-multiselect";
+import TextContextMenu from "@/pages/TextContextMenu";
+import Vue from "vue";
+import Annotation from "@/components/Annotation";
+
 export default {
-  components: { Multiselect },
+  components: { TextContextMenu, Multiselect },
   props: {
     id: {
       type: Number,
       required: true
     }
   },
+  async mounted() {
+    await this.loadAnnotations();
+    this.parseDom();
+  },
   created() {
     this.loadLessons();
   },
   data: () => ({
-    search: "",
+    annotationPayload: {
+      content: ""
+    },
+    selection: "",
+    range: "",
+    contextMenu: {
+      show: false,
+      x: 0,
+      y: 0
+    },
     payload: { source: "", target: "", pronunciation: "", lesson: {} }
   }),
   computed: {
     ...mapGetters("texts", ["text"]),
     ...mapGetters("lessons", ["lessonOptions"]),
+    ...mapGetters("annotations", ["annotations", "annotation"]),
+
     searchUrl() {
-      return `https://en.wiktionary.org/wiki/${this.search}#Persian`;
+      return `https://en.wiktionary.org/wiki/${this.selection}#Persian`;
     }
   },
   methods: {
+    ...mapActions("texts", ["updateText"]),
     ...mapActions("lessons", ["loadLessons"]),
     ...mapActions("words", ["createWord"]),
+    ...mapMutations("annotations", ["clear"]),
+    ...mapActions("annotations", [
+      "loadAnnotations",
+      "createAnnotation",
+      "fetchAnnotation",
+      "deleteAnnotation"
+    ]),
+    clearOrphanAnnotations() {
+      const nodes = document.getElementsByClassName("annotation");
+      const selectors = this.annotations.map(annotation => annotation.selector);
+      Array.from(nodes).forEach(node => {
+        if (!selectors.includes(node.dataset.selector)) {
+          const text = document.createTextNode(node.innerText);
+          node.replaceWith(text);
+        }
+      });
+    },
+    handleDeleteAnnotation() {
+      this.deleteAnnotation(this.annotation.id).then(this.parseDom);
+    },
+    showAnnotation(evt, annotation) {
+      this.$bvModal.show("show-annotation-modal");
+      this.fetchAnnotation(annotation.id);
+    },
+    spanToAnnotationComponent(annotation) {
+      const instance = this.getAnnotationInstance({
+        id: annotation.dataset.id,
+        selector: annotation.dataset.selector,
+        content: annotation.innerHTML
+      });
+      annotation.parentNode.replaceChild(instance.$el, annotation);
+    },
+    getAnnotationInstance(propsData) {
+      const component = Vue.extend(Annotation);
+      const instance = new component({
+        propsData
+      });
+      instance.$ref = propsData.selector;
+      instance.$mount();
+      instance.$on("click", this.showAnnotation);
+      return instance;
+    },
+    parseDom() {
+      this.clearOrphanAnnotations();
+      annotateNode(this.annotations, "selectable");
+      Array.from(document.getElementsByClassName("annotation")).forEach(
+        this.spanToAnnotationComponent
+      );
+    },
     translate() {
-      this.search = document.getSelection().toString();
-      if (this.search !== "") {
+      if (this.selection !== "") {
         this.$bvModal.show("wiktionary-modal");
       }
     },
-
+    handleSearchOnWiktionary() {
+      this.contextMenu.show = false;
+      this.translate();
+    },
+    handleSaveAnnotation() {
+      this.createAnnotation({
+        TextId: this.id,
+        selector: this.selection,
+        content: this.annotationPayload.content
+      })
+        .then(({ id, selector }) => {
+          const span = document.createElement("span");
+          span.classList.add("annotation");
+          span.dataset.id = id;
+          span.dataset.selector = selector;
+          this.range.surroundContents(span);
+          return this.$refs.selectable.innerHTML;
+        })
+        .then(content => {
+          return this.updateText({ id: this.id, content });
+        })
+        .then(this.parseDom);
+      this.$bvModal.hide("annotation-modal");
+    },
+    showContextMenu(evt) {
+      const selection = document.getSelection();
+      this.selection = selection.toString();
+      this.range = selection.getRangeAt(0);
+      if (this.selection.toString() !== "") {
+        this.contextMenu.show = true;
+        this.contextMenu.x = evt.clientX - 225;
+        this.contextMenu.y = evt.clientY - 50;
+      }
+    },
     showAddToLessonModal() {
       this.payload = {
         ...this.payload,
         source: "",
         pronunciation: "",
-        target: this.search
+        target: this.selection
       };
       this.$bvModal.hide("wiktionary-modal");
       this.$bvModal.show("add-to-lesson-modal");
@@ -134,7 +284,6 @@ export default {
   }
 };
 </script>
-
 <style>
 .font-size-lg {
   font-size: 1.5rem;
