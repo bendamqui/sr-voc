@@ -5,6 +5,8 @@
       size="lg"
       id="show-annotation-modal"
       :title="annotation.selector"
+      cancel-title="Delete"
+      cancel-variant="danger"
       @cancel="handleDeleteAnnotation"
     >
       <div v-html="annotation.content"></div>
@@ -86,7 +88,6 @@
     >
       <h1 class="h2">{{ text(id).title }}</h1>
       <div class="btn-toolbar mb-2 mb-md-0">
-        <b-button @click="lorem">Lorem</b-button>
         <b-button
           @click="$router.push('texts')"
           variant="success"
@@ -126,10 +127,7 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 import Multiselect from "vue-multiselect";
 import TextContextMenu from "@/pages/TextContextMenu";
 import Vue from "vue";
-
 import Annotation from "@/components/Annotation";
-
-const annotationState = Vue.observable({ show: false });
 
 export default {
   components: { TextContextMenu, Multiselect },
@@ -139,17 +137,12 @@ export default {
       required: true
     }
   },
-  mounted() {
-    this.clearOrphanAnnotations();
-    annotateNode(this.annotations, "selectable");
-    Array.from(document.getElementsByClassName("annotation")).forEach(
-      this.spanToAnnotationComponent
-    );
+  async mounted() {
+    await this.loadAnnotations();
+    this.parseDom();
   },
   created() {
-    //this.clear();
     this.loadLessons();
-    this.loadAnnotations();
   },
   data: () => ({
     annotationPayload: {
@@ -168,9 +161,6 @@ export default {
     ...mapGetters("texts", ["text"]),
     ...mapGetters("lessons", ["lessonOptions"]),
     ...mapGetters("annotations", ["annotations", "annotation"]),
-    annotationState() {
-      return annotationState;
-    },
 
     searchUrl() {
       return `https://en.wiktionary.org/wiki/${this.selection}#Persian`;
@@ -184,13 +174,12 @@ export default {
     ...mapActions("annotations", [
       "loadAnnotations",
       "createAnnotation",
-      "fetchAnnotation"
+      "fetchAnnotation",
+      "deleteAnnotation"
     ]),
     clearOrphanAnnotations() {
       const nodes = document.getElementsByClassName("annotation");
-      const selectors = this.annotations.map(
-        annotation => annotation.selectors
-      );
+      const selectors = this.annotations.map(annotation => annotation.selector);
       Array.from(nodes).forEach(node => {
         if (!selectors.includes(node.dataset.selector)) {
           const text = document.createTextNode(node.innerText);
@@ -199,7 +188,7 @@ export default {
       });
     },
     handleDeleteAnnotation() {
-      console.log("delete ");
+      this.deleteAnnotation(this.annotation.id).then(this.parseDom);
     },
     showAnnotation(evt, annotation) {
       this.$bvModal.show("show-annotation-modal");
@@ -216,44 +205,29 @@ export default {
     getAnnotationInstance(propsData) {
       const component = Vue.extend(Annotation);
       const instance = new component({
-        propsData,
-        created() {
-          console.log("created");
-        },
-        destroyed() {
-          console.log("destroy");
-        }
+        propsData
       });
-
       instance.$ref = propsData.selector;
       instance.$mount();
-      this.$nextTick(() => {
-        console.log(this.$refs["Lorem"]);
-      });
       instance.$on("click", this.showAnnotation);
       return instance;
     },
-    lorem() {
-      this.updateText({
-        id: this.id,
-        content:
-          "Lorem ipsum dolor sit amet, consectetur adipisicing elit. A accusamus blanditiis cumque delectus dolor ducimus error, eveniet exercitationem, inventore ipsum iusto libero nesciunt numquam quis repellendus sit voluptatum! Expedita, itaque?"
-      });
-    },
-    handleHideAnnotation() {
-      annotationState.show = false;
+    parseDom() {
+      this.clearOrphanAnnotations();
+      annotateNode(this.annotations, "selectable");
+      Array.from(document.getElementsByClassName("annotation")).forEach(
+        this.spanToAnnotationComponent
+      );
     },
     translate() {
       if (this.selection !== "") {
         this.$bvModal.show("wiktionary-modal");
       }
     },
-
     handleSearchOnWiktionary() {
       this.contextMenu.show = false;
       this.translate();
     },
-
     handleSaveAnnotation() {
       this.createAnnotation({
         TextId: this.id,
@@ -271,14 +245,9 @@ export default {
         .then(content => {
           return this.updateText({ id: this.id, content });
         })
-        .then(() => {
-          Array.from(document.getElementsByClassName("annotation")).forEach(
-            this.spanToAnnotationComponent
-          );
-        });
+        .then(this.parseDom);
       this.$bvModal.hide("annotation-modal");
     },
-
     showContextMenu(evt) {
       const selection = document.getSelection();
       this.selection = selection.toString();
@@ -289,7 +258,6 @@ export default {
         this.contextMenu.y = evt.clientY - 50;
       }
     },
-
     showAddToLessonModal() {
       this.payload = {
         ...this.payload,
@@ -316,7 +284,6 @@ export default {
   }
 };
 </script>
-
 <style>
 .font-size-lg {
   font-size: 1.5rem;

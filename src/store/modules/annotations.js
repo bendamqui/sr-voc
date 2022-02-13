@@ -35,7 +35,7 @@ const actions = {
   deleteAnnotation({ dispatch }, id) {
     return Annotation.findByPk(id).then(model => {
       model.destroy();
-      dispatch("loadTextAnnotations", model.TextId);
+      return dispatch("loadAnnotations");
     });
   },
 
