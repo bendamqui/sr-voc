@@ -22,6 +22,11 @@ const actions = {
       raw: true
     }).then(annotations => commit("setAnnotations", annotations));
   },
+  loadAnnotations({ commit }) {
+    return Annotation.findAll({ raw: true }).then(annotations =>
+      commit("setAnnotations", annotations)
+    );
+  },
   fetchAnnotation({ commit }, id) {
     return Annotation.findByPk(id, { raw: true }).then(annotation =>
       commit("setAnnotation", annotation)
@@ -44,10 +49,15 @@ const actions = {
 
 const mutations = {
   setAnnotations(state, annotations) {
-    state.annotations = annotations;
+    state.annotations = annotations || [];
   },
   setAnnotation(state, annotation) {
     state.annotation = annotation;
+  },
+  clear(state) {
+    console.log("clear");
+    state.annotation = {};
+    state.annotations = [];
   }
 };
 

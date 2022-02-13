@@ -3,6 +3,15 @@
     <b-modal
       class="mh-100"
       size="lg"
+      id="show-annotation-modal"
+      :title="annotation.selector"
+      @cancel="handleDeleteAnnotation"
+    >
+      <div v-html="annotation.content"></div>
+    </b-modal>
+    <b-modal
+      class="mh-100"
+      size="lg"
       id="annotation-modal"
       title="Annotate"
       @ok="handleSaveAnnotation"
@@ -18,8 +27,17 @@
     </b-modal>
     <b-modal class="mh-100" size="lg" id="wiktionary-modal" title="Wiktionary">
       <template #modal-footer>
-        <b-button variant="info" @click="showAddToLessonModal">
+        <b-button variant="primary" @click="showAddToLessonModal">
           Add to lesson
+        </b-button>
+        <b-button
+          variant="info"
+          @click="
+            $bvModal.hide('wiktionary-modal');
+            $bvModal.show('annotation-modal');
+          "
+        >
+          Annotate
         </b-button>
       </template>
       <div class="row">
@@ -68,6 +86,7 @@
     >
       <h1 class="h2">{{ text(id).title }}</h1>
       <div class="btn-toolbar mb-2 mb-md-0">
+        <b-button @click="lorem">Lorem</b-button>
         <b-button
           @click="$router.push('texts')"
           variant="success"
@@ -78,12 +97,6 @@
     </div>
 
     <div class="row">
-      <AnnotationPopover
-        @close="handleHideAnnotation"
-        :id="annotationState.id"
-        :show="annotationState.show"
-      />
-
       <TextContextMenu
         v-if="contextMenu.show"
         :x="contextMenu.x"
@@ -108,31 +121,18 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { annotateNode } from "@/utils/annotations";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import Multiselect from "vue-multiselect";
 import TextContextMenu from "@/pages/TextContextMenu";
 import Vue from "vue";
-import AnnotationPopover from "@/components/AnnotationPopover";
+
+import Annotation from "@/components/Annotation";
 
 const annotationState = Vue.observable({ show: false });
 
-const showAnnotationHandler = evt => {
-  annotationState.show = true;
-  annotationState.id = evt.target.dataset.annotationId;
-  annotationState.selector = evt.target.dataset.selector;
-};
-
-const setAnnotationListeners = () => {
-  Array.from(document.getElementsByClassName("annotation")).forEach(
-    annotation => {
-      annotation.removeEventListener("click", showAnnotationHandler);
-      annotation.addEventListener("click", showAnnotationHandler);
-    }
-  );
-};
-
 export default {
-  components: { AnnotationPopover, TextContextMenu, Multiselect },
+  components: { TextContextMenu, Multiselect },
   props: {
     id: {
       type: Number,
@@ -140,11 +140,16 @@ export default {
     }
   },
   mounted() {
-    setAnnotationListeners();
+    this.clearOrphanAnnotations();
+    annotateNode(this.annotations, "selectable");
+    Array.from(document.getElementsByClassName("annotation")).forEach(
+      this.spanToAnnotationComponent
+    );
   },
   created() {
+    //this.clear();
     this.loadLessons();
-    this.loadTextAnnotations(this.id);
+    this.loadAnnotations();
   },
   data: () => ({
     annotationPayload: {
@@ -162,13 +167,11 @@ export default {
   computed: {
     ...mapGetters("texts", ["text"]),
     ...mapGetters("lessons", ["lessonOptions"]),
-    ...mapGetters("annotations", ["annotations"]),
+    ...mapGetters("annotations", ["annotations", "annotation"]),
     annotationState() {
       return annotationState;
     },
-    annotationShowState() {
-      return annotationState.show;
-    },
+
     searchUrl() {
       return `https://en.wiktionary.org/wiki/${this.selection}#Persian`;
     }
@@ -177,7 +180,66 @@ export default {
     ...mapActions("texts", ["updateText"]),
     ...mapActions("lessons", ["loadLessons"]),
     ...mapActions("words", ["createWord"]),
-    ...mapActions("annotations", ["loadTextAnnotations", "createAnnotation"]),
+    ...mapMutations("annotations", ["clear"]),
+    ...mapActions("annotations", [
+      "loadAnnotations",
+      "createAnnotation",
+      "fetchAnnotation"
+    ]),
+    clearOrphanAnnotations() {
+      const nodes = document.getElementsByClassName("annotation");
+      const selectors = this.annotations.map(
+        annotation => annotation.selectors
+      );
+      Array.from(nodes).forEach(node => {
+        if (!selectors.includes(node.dataset.selector)) {
+          const text = document.createTextNode(node.innerText);
+          node.replaceWith(text);
+        }
+      });
+    },
+    handleDeleteAnnotation() {
+      console.log("delete ");
+    },
+    showAnnotation(evt, annotation) {
+      this.$bvModal.show("show-annotation-modal");
+      this.fetchAnnotation(annotation.id);
+    },
+    spanToAnnotationComponent(annotation) {
+      const instance = this.getAnnotationInstance({
+        id: annotation.dataset.id,
+        selector: annotation.dataset.selector,
+        content: annotation.innerHTML
+      });
+      annotation.parentNode.replaceChild(instance.$el, annotation);
+    },
+    getAnnotationInstance(propsData) {
+      const component = Vue.extend(Annotation);
+      const instance = new component({
+        propsData,
+        created() {
+          console.log("created");
+        },
+        destroyed() {
+          console.log("destroy");
+        }
+      });
+
+      instance.$ref = propsData.selector;
+      instance.$mount();
+      this.$nextTick(() => {
+        console.log(this.$refs["Lorem"]);
+      });
+      instance.$on("click", this.showAnnotation);
+      return instance;
+    },
+    lorem() {
+      this.updateText({
+        id: this.id,
+        content:
+          "Lorem ipsum dolor sit amet, consectetur adipisicing elit. A accusamus blanditiis cumque delectus dolor ducimus error, eveniet exercitationem, inventore ipsum iusto libero nesciunt numquam quis repellendus sit voluptatum! Expedita, itaque?"
+      });
+    },
     handleHideAnnotation() {
       annotationState.show = false;
     },
@@ -201,8 +263,7 @@ export default {
         .then(({ id, selector }) => {
           const span = document.createElement("span");
           span.classList.add("annotation");
-          span.setAttribute("ref", "a");
-          span.dataset.annotationId = id;
+          span.dataset.id = id;
           span.dataset.selector = selector;
           this.range.surroundContents(span);
           return this.$refs.selectable.innerHTML;
@@ -211,7 +272,9 @@ export default {
           return this.updateText({ id: this.id, content });
         })
         .then(() => {
-          setAnnotationListeners();
+          Array.from(document.getElementsByClassName("annotation")).forEach(
+            this.spanToAnnotationComponent
+          );
         });
       this.$bvModal.hide("annotation-modal");
     },
@@ -255,9 +318,6 @@ export default {
 </script>
 
 <style>
-.annotation {
-  color: red;
-}
 .font-size-lg {
   font-size: 1.5rem;
 }
