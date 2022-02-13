@@ -1,23 +1,9 @@
 <template>
-  <div class="green" @click="test">{{ msg }}</div>
+  <div>{{ msg }}</div>
 </template>
 
 <script>
-/**
- * - on mounted transform span into component
- */
 export default {
-  props: ["msg"],
-  methods: {
-    test() {
-      console.log("yeah");
-    }
-  }
+  props: ["msg"]
 };
 </script>
-
-<style>
-.green {
-  color: green;
-}
-</style>
