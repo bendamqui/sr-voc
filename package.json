@@ -31,7 +31,7 @@
     "date-fns": "^2.16.1",
     "electron-updater": "^4.3.5",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^6.3.5",
+    "sequelize": "^6.19.0",
     "sqlite3": "^5.0.0",
     "vue": "^2.6.12",
     "vue-chartjs": "^3.5.1",
