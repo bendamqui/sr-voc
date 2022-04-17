@@ -1,5 +1,23 @@
 <template>
   <div>
+    <b-modal class="mh-100" size="lg" id="hayyim-modal" title="Hayyim">
+      <template #modal-footer>
+        <b-button variant="primary" @click="showAddToLessonModal">
+          Add to lesson
+        </b-button>
+        <b-button variant="info" @click="showAnnotateModal">
+          Annotate
+        </b-button>
+      </template>
+      <div class="row" v-if="hayyimWords.length !== 0">
+        <div
+          v-for="word in hayyimWords"
+          :key="word.id"
+          v-html="word.html"
+        ></div>
+      </div>
+      <div v-else>No results for {{ selection }}</div>
+    </b-modal>
     <b-modal
       class="mh-100"
       size="lg"
@@ -98,20 +116,7 @@
     </div>
 
     <div class="row">
-      <TextContextMenu
-        v-if="contextMenu.show"
-        :x="contextMenu.x"
-        :y="contextMenu.y"
-        @search-wiktionary="handleSearchOnWiktionary"
-        @annotate="
-          $bvModal.show('annotation-modal');
-          contextMenu.show = false;
-        "
-        @cancel="contextMenu.show = false"
-      />
-
       <div
-        @mouseup="showContextMenu"
         id="selectable"
         ref="selectable"
         v-html="text(id).content"
@@ -125,12 +130,12 @@
 import { annotateNode } from "@/utils/annotations";
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import Multiselect from "vue-multiselect";
-import TextContextMenu from "@/pages/TextContextMenu";
 import Vue from "vue";
 import Annotation from "@/components/Annotation";
+import contextMenu from "electron-context-menu";
 
 export default {
-  components: { TextContextMenu, Multiselect },
+  components: { Multiselect },
   props: {
     id: {
       type: Number,
@@ -141,8 +146,31 @@ export default {
     await this.loadAnnotations();
     this.parseDom();
   },
+  destroyed() {
+    // The return value of `contextMenu()` is a function that disposes of the created event listeners
+    this.contextMenu();
+  },
   created() {
     this.loadLessons();
+    this.contextMenu = contextMenu({
+      showLookUpSelection: false,
+      showSearchWithGoogle: false,
+      prepend: (defaultActions, { selectionText }) => [
+        {
+          label: "Search Hayyim Dictionary",
+          visible: selectionText.trim().length > 0,
+          click: () => this.handleSearchHayyim(selectionText)
+        },
+        {
+          label: "Search Wiktionary",
+          visible: selectionText.trim().length > 0,
+          click: () => {
+            this.selection = selectionText.trim();
+            this.$bvModal.show("wiktionary-modal");
+          }
+        }
+      ]
+    });
   },
   data: () => ({
     annotationPayload: {
@@ -150,14 +178,11 @@ export default {
     },
     selection: "",
     range: "",
-    contextMenu: {
-      show: false,
-      x: 0,
-      y: 0
-    },
+    contextMenu: null,
     payload: { source: "", target: "", pronunciation: "", lesson: {} }
   }),
   computed: {
+    ...mapGetters("hayyimDictionary", { hayyimWords: "words" }),
     ...mapGetters("texts", ["text"]),
     ...mapGetters("lessons", ["lessonOptions"]),
     ...mapGetters("annotations", ["annotations", "annotation"]),
@@ -167,6 +192,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions("hayyimDictionary", { searchHayyim: "search" }),
     ...mapActions("texts", ["updateText"]),
     ...mapActions("lessons", ["loadLessons"]),
     ...mapActions("words", ["createWord"]),
@@ -219,44 +245,28 @@ export default {
         this.spanToAnnotationComponent
       );
     },
-    translate() {
-      if (this.selection !== "") {
-        this.$bvModal.show("wiktionary-modal");
-      }
-    },
-    handleSearchOnWiktionary() {
-      this.contextMenu.show = false;
-      this.translate();
+    async handleSearchHayyim(selectionText) {
+      this.selection = selectionText.trim();
+      await this.searchHayyim(this.selection);
+      this.$bvModal.show("hayyim-modal");
     },
     handleSaveAnnotation() {
+      if (this.selection.length === 0) {
+        return;
+      }
       this.createAnnotation({
         TextId: this.id,
         selector: this.selection,
         content: this.annotationPayload.content
       })
-        .then(({ id, selector }) => {
-          const span = document.createElement("span");
-          span.classList.add("annotation");
-          span.dataset.id = id;
-          span.dataset.selector = selector;
-          this.range.surroundContents(span);
-          return this.$refs.selectable.innerHTML;
-        })
-        .then(content => {
-          return this.updateText({ id: this.id, content });
-        })
-        .then(this.parseDom);
+        .then(this.loadAnnotations)
+        .then(this.parseDom)
+        .catch(e => console.log(e));
       this.$bvModal.hide("annotation-modal");
     },
-    showContextMenu(evt) {
-      const selection = document.getSelection();
-      this.selection = selection.toString();
-      this.range = selection.getRangeAt(0);
-      if (this.selection.toString() !== "") {
-        this.contextMenu.show = true;
-        this.contextMenu.x = evt.clientX - 225;
-        this.contextMenu.y = evt.clientY - 50;
-      }
+    showAnnotateModal() {
+      this.$bvModal.hide("hayyim-modal");
+      this.$bvModal.show("annotation-modal");
     },
     showAddToLessonModal() {
       this.payload = {
@@ -266,6 +276,7 @@ export default {
         target: this.selection
       };
       this.$bvModal.hide("wiktionary-modal");
+      this.$bvModal.hide("hayyim-modal");
       this.$bvModal.show("add-to-lesson-modal");
     },
     handleSubmit() {
