@@ -80,7 +80,7 @@
             Texts <span class="sr-only">(current)</span>
           </router-link>
         </li>
-        <!--        <li class="nav-item">
+        <li v-if="showSandbox" class="nav-item">
           <router-link
             active-class="active"
             to="/sandbox"
@@ -90,7 +90,7 @@
             <span data-feather="home"></span>
             Sandbox <span class="sr-only">(current)</span>
           </router-link>
-        </li>-->
+        </li>
       </ul>
     </div>
   </nav>
@@ -102,7 +102,10 @@ import { mapGetters } from "vuex";
 export default {
   components: { Review },
   computed: {
-    ...mapGetters("words", ["wordsToReviewCount"])
+    ...mapGetters("words", ["wordsToReviewCount"]),
+    showSandbox() {
+      return process.env.NODE_ENV === "development";
+    }
   }
 };
 </script>

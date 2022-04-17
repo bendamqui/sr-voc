@@ -29,5 +29,7 @@ export const importDictionary = async () => {
       .then(textToDom)
       .then(extractWords)
       .then(saveWords);
+    console.log(`Imported page ${page}`);
   }
+  console.log("done");
 };
