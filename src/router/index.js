@@ -66,6 +66,11 @@ const routes = [
         path: "/sandbox",
         name: "sandbox",
         component: () => import("@/pages/Sandbox")
+      },
+      {
+        path: "/custom-quiz",
+        name: "custom-quiz",
+        component: () => import("@/pages/CustomQuiz/index")
       }
     ]
   },

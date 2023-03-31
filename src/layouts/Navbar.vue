@@ -6,6 +6,7 @@
     <ul class="navbar-nav nav-actions px-3">
       <li class="nav-item">
         <b-button
+          disabled
           size="sm"
           @click.prevent="importData"
           variant="warning"
@@ -15,6 +16,7 @@
       </li>
       <li class="nav-item">
         <b-button
+          disabled
           size="sm"
           @click.prevent="exportData"
           variant="success"
@@ -30,10 +32,7 @@
 import { remote } from "electron";
 import { format } from "date-fns";
 const { dialog } = remote;
-import { exportData } from "@/modules/exportData";
-import { importData } from "@/modules/importData";
 import { version } from "@/../package.json";
-
 export default {
   data: () => ({
     version: version
@@ -42,7 +41,7 @@ export default {
     importData() {
       dialog.showOpenDialog({}).then(({ canceled, filePaths }) => {
         if (!canceled) {
-          importData(filePaths);
+          alert(filePaths);
         }
       });
     },
@@ -54,7 +53,7 @@ export default {
         })
         .then(({ canceled, filePath }) => {
           if (!canceled) {
-            exportData(filePath);
+            alert(filePath);
           }
         });
     }

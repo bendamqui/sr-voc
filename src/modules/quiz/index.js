@@ -77,3 +77,64 @@ export const createQuiz = (words, options) => {
     getProgress: () => progress.get()
   };
 };
+
+export const createObservableQuiz = (words, options) => {
+  return Object.assign(
+    {
+      get progress() {
+        return {
+          max: this["questions"].length,
+          results: this.results.map(({ result }) => result)
+        };
+      }
+    },
+    {
+      started: false,
+      done: false,
+      paused: false,
+      cursor: 0,
+      answer: "",
+      questions: createQuestions(words, options),
+      question: {},
+      errors: [],
+      results: [],
+      start() {
+        this.started = true;
+        this.next();
+      },
+      next() {
+        this.paused = false;
+        this.answer = "";
+        this.hasMoreQuestions()
+          ? (this.question = this.questions[this.cursor++])
+          : (this.done = true);
+      },
+      validator:
+        options.validator ||
+        function(question, input) {
+          return question.target === input;
+        },
+      validate() {
+        const result = this.validator(this.question, this.answer);
+        this.results.push({
+          ...this.question,
+          result
+        });
+        result ? this.handleSuccess() : this.handleFailure();
+      },
+      handleFailure() {
+        this.paused = true;
+        this.errors.push(this.question);
+        if (options.retryErrors) {
+          this.questions.push(this.question);
+        }
+      },
+      handleSuccess() {
+        this.next();
+      },
+      hasMoreQuestions() {
+        return this.cursor < this.questions.length;
+      }
+    }
+  );
+};
