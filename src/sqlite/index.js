@@ -1,6 +1,5 @@
+import { ipcRenderer } from "electron";
 import { Sequelize } from "sequelize";
-import { remote } from "electron";
-const { app } = remote;
 import sqlite3 from "sqlite3";
 import { createDictionaryWord } from "@/sqlite/DictionaryWord";
 import { createLesson } from "@/sqlite/Lesson";
@@ -10,7 +9,9 @@ import { createText } from "@/sqlite/Text";
 import { createAnnotation } from "@/sqlite/Annotation";
 import { createHayyimDictionary } from "@/sqlite/HayyimDictionary";
 
-const storage = `${app.getPath("userData")}/${process.env.NODE_ENV}.sqlite`;
+const userData = ipcRenderer.sendSync("get-user-data-path");
+
+const storage = `${userData}/${process.env.NODE_ENV}.sqlite`;
 console.log(`connection to sqlite with file -> ${storage}`);
 
 const sequelize = new Sequelize("db", null, null, {

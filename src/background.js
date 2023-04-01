@@ -2,7 +2,7 @@
 
 /* global __static */
 import path from "path";
-import { app, protocol, BrowserWindow } from "electron";
+import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -14,6 +14,10 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 async function createWindow() {
+  ipcMain.on("get-user-data-path", event => {
+    event.returnValue = app.getPath("userData");
+  });
+
   // Create the browser window.
   const win = new BrowserWindow({
     width: 800,
@@ -23,8 +27,10 @@ async function createWindow() {
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-      enableRemoteModule: true
+      //nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+      enableRemoteModule: true,
+      nodeIntegration: true,
+      contextIsolation: false
     },
     icon: path.join(__static, "icon.png")
   });

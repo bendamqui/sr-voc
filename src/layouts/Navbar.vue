@@ -29,34 +29,14 @@
 </template>
 
 <script>
-import { remote } from "electron";
-import { format } from "date-fns";
-const { dialog } = remote;
 import { version } from "@/../package.json";
 export default {
   data: () => ({
     version: version
   }),
   methods: {
-    importData() {
-      dialog.showOpenDialog({}).then(({ canceled, filePaths }) => {
-        if (!canceled) {
-          alert(filePaths);
-        }
-      });
-    },
-    exportData() {
-      dialog
-        .showSaveDialog({
-          buttonLabel: "Export",
-          defaultPath: format(new Date(), "yyyy_MM_dd_HH_mm_ss") + ".json"
-        })
-        .then(({ canceled, filePath }) => {
-          if (!canceled) {
-            alert(filePath);
-          }
-        });
-    }
+    importData() {},
+    exportData() {}
   }
 };
 </script>
