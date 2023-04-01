@@ -5,7 +5,7 @@
         <h1>{{ quiz.question.source }}</h1>
       </div>
     </div>
-    <b-form @submit.prevent="quiz.validate">
+    <b-form @submit.prevent="quiz.validate()">
       <div class="row">
         <div class="col-md-6">
           <b-form-group>
