@@ -91,6 +91,17 @@
             Custom Quiz <span class="sr-only">(current)</span>
           </router-link>
         </li>
+        <li class="nav-item">
+          <router-link
+            active-class="active"
+            to="/settings"
+            class="nav-link"
+            href="#"
+          >
+            <span data-feather="home"></span>
+            Settings <span class="sr-only">(current)</span>
+          </router-link>
+        </li>
         <li v-if="showSandbox" class="nav-item">
           <router-link
             active-class="active"

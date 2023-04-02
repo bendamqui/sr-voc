@@ -1,6 +1,5 @@
 import { DataTypes as type, Op } from "sequelize";
 import { Result } from "@/sqlite/index";
-import { subDays, subHours } from "date-fns";
 
 export const createWord = sequelize => {
   const model = sequelize.define("Word", {
@@ -12,22 +11,10 @@ export const createWord = sequelize => {
     lastAttempt: { type: type.DATE }
   });
 
-  model.selectWordsToReview = async () => {
+  model.selectWordsToReview = async settings => {
     return model.findAll({
       where: {
-        [Op.or]: [
-          { level: 1, lastAttempt: { [Op.lt]: subHours(new Date(), 4) } },
-          { level: 2, lastAttempt: { [Op.lt]: subDays(new Date(), 1) } },
-          { level: 3, lastAttempt: { [Op.lt]: subDays(new Date(), 3) } },
-          { level: 4, lastAttempt: { [Op.lt]: subDays(new Date(), 7) } },
-          { level: 5, lastAttempt: { [Op.lt]: subDays(new Date(), 14) } },
-          { level: 6, lastAttempt: { [Op.lt]: subDays(new Date(), 30) } },
-          { level: 7, lastAttempt: { [Op.lt]: subDays(new Date(), 90) } },
-          {
-            level: { [Op.gt]: 7 },
-            lastAttempt: { [Op.lt]: subDays(new Date(), 120) }
-          }
-        ]
+        [Op.or]: settings
       },
       raw: true
     });

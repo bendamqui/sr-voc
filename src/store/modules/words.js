@@ -47,8 +47,9 @@ const actions = {
       commit("setDifficultWords", docs)
     );
   },
-  loadWordsToReviewCount({ commit }) {
-    return Word.selectWordsToReview().then(words => {
+  async loadWordsToReviewCount({ commit, rootGetters }) {
+    const query = await rootGetters["settings/toSequelizeReviewQuery"];
+    return Word.selectWordsToReview(query).then(words => {
       commit("setWordsToReviewCount", words.length);
     });
   },

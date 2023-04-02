@@ -33,14 +33,16 @@ import QuizInput from "@/components/modals/quiz/QuizInput";
 import { createQuiz } from "@/modules/quiz";
 import { DIRECTION, QUESTION_TYPE } from "@/modules/quiz/types";
 import { Word, Result } from "@/sqlite";
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   components: { ProgressBar, QuizInput },
   beforeCreate() {
     this.$root.$on("bv::modal::show", async (bvEvent, modalId) => {
       if (modalId === this.modalId) {
-        this.words = await Word.selectWordsToReview();
+        this.words = await Word.selectWordsToReview(
+          this.toSequelizeReviewQuery
+        );
         if (this.words.length > 0) {
           this.start();
         } else {
@@ -50,6 +52,7 @@ export default {
     });
   },
   computed: {
+    ...mapGetters("settings", ["toSequelizeReviewQuery"]),
     progressObject() {
       return this.progress.toObject();
     }

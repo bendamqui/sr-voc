@@ -71,6 +71,11 @@ const routes = [
         path: "/custom-quiz",
         name: "custom-quiz",
         component: () => import("@/pages/CustomQuiz/index")
+      },
+      {
+        path: "/settings",
+        name: "settings",
+        component: () => import("@/pages/Settings/index")
       }
     ]
   },

@@ -6,9 +6,18 @@ import dictionary from "@/store/modules/dictionary";
 import hayyimDictionary from "@/store/modules/hayyimDictionary";
 import texts from "@/store/modules/texts";
 import annotations from "@/store/modules/annotations";
+import settings from "@/store/modules/settings";
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-  modules: { lessons, words, dictionary, texts, annotations, hayyimDictionary }
+  modules: {
+    lessons,
+    words,
+    dictionary,
+    texts,
+    annotations,
+    hayyimDictionary,
+    settings
+  }
 });

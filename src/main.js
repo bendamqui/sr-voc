@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { sequelize, sync } from "./sqlite";
 
 (async () => {
+  await store.dispatch("settings/init");
   await sequelize
     .authenticate()
     .then(() => console.log("authenticated to sqlite"))
@@ -41,8 +42,9 @@ import { sequelize, sync } from "./sqlite";
     store,
     render: h => h(App),
     data: () => ({ worker: undefined }),
-    created() {
-      this.loadWordsToReviewCount();
+    async created() {
+      await this.fetch();
+      await this.loadWordsToReviewCount();
       this.worker = setInterval(() => {
         this.loadWordsToReviewCount();
       }, 1000 * 5);
@@ -51,7 +53,8 @@ import { sequelize, sync } from "./sqlite";
       clearInterval(this.worker);
     },
     methods: {
-      ...mapActions("words", ["loadWordsToReviewCount"])
+      ...mapActions("words", ["loadWordsToReviewCount"]),
+      ...mapActions("settings", ["fetch"])
     }
   }).$mount("#app");
 })();
