@@ -5,8 +5,8 @@
         <div class="col-md-2">
           <b-form-group label="Number of questions">
             <b-form-input
+              type="number"
               v-model="settings.questionCount"
-              @keypress="handleNumberInput"
             ></b-form-input>
           </b-form-group>
         </div>
@@ -57,13 +57,6 @@ export default {
         retryErrors: true
       }
     };
-  },
-  methods: {
-    handleNumberInput(event) {
-      if (!event.key.match(/[0-9]/)) {
-        event.preventDefault();
-      }
-    }
   }
 };
 </script>
