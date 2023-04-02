@@ -132,7 +132,8 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 import Multiselect from "vue-multiselect";
 import Vue from "vue";
 import Annotation from "@/components/Annotation";
-import contextMenu from "electron-context-menu";
+import { ipcRenderer } from "electron";
+//import contextMenu from "electron-context-menu";
 
 export default {
   components: { Multiselect },
@@ -146,31 +147,16 @@ export default {
     await this.loadAnnotations();
     this.parseDom();
   },
-  destroyed() {
-    // The return value of `contextMenu()` is a function that disposes of the created event listeners
-    this.contextMenu();
-  },
+
   created() {
-    this.loadLessons();
-    this.contextMenu = contextMenu({
-      showLookUpSelection: false,
-      showSearchWithGoogle: false,
-      prepend: (defaultActions, { selectionText }) => [
-        {
-          label: "Search Hayyim Dictionary",
-          visible: selectionText.trim().length > 0,
-          click: () => this.handleSearchHayyim(selectionText)
-        },
-        {
-          label: "Search Wiktionary",
-          visible: selectionText.trim().length > 0,
-          click: () => {
-            this.selection = selectionText.trim();
-            this.$bvModal.show("wiktionary-modal");
-          }
-        }
-      ]
+    ipcRenderer.on("search-hayyim-dictionary", (event, args) =>
+      this.handleSearchHayyim(args)
+    );
+    ipcRenderer.on("search-wiktionary-dictionary", (event, args) => {
+      this.selection = args.trim();
+      this.$bvModal.show("wiktionary-modal");
     });
+    this.loadLessons();
   },
   data: () => ({
     annotationPayload: {
@@ -178,7 +164,6 @@ export default {
     },
     selection: "",
     range: "",
-    contextMenu: null,
     payload: { source: "", target: "", pronunciation: "", lesson: {} }
   }),
   computed: {
