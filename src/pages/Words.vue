@@ -49,6 +49,7 @@ export default {
         { key: "target", sortable: true },
         { key: "pronunciation", sortable: true },
         { key: "level", sortable: true },
+        { key: "LessonId", sortable: true },
         { key: "lastAttempt", sortable: true, formatter: formatDate },
         { key: "createdAt", sortable: true, formatter: formatDate },
         { key: "updatedAt", sortable: true, formatter: formatDate }

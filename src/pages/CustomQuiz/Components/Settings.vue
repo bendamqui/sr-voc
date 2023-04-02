@@ -5,7 +5,6 @@
         <div class="col-md-2">
           <b-form-group label="Number of questions">
             <b-form-input
-              type="number"
               v-model="settings.questionCount"
               @keypress="handleNumberInput"
             ></b-form-input>

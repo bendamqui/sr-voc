@@ -15,10 +15,11 @@ export default {
   computed: {
     items() {
       return this.results.map(
-        ({ id, source, target, LessonId, level, result }) => ({
+        ({ id, target, source, pronunciation, LessonId, level, result }) => ({
           id,
-          source,
           target,
+          source,
+          pronunciation,
           LessonId,
           level,
           _rowVariant: result ? "success" : "danger"
