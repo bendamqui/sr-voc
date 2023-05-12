@@ -22,6 +22,12 @@
           <template #head(id)>
             <b-checkbox @change="toggleCheckAll" />
           </template>
+          <template #cell(LessonId)="{item}">
+            <router-link
+              :to="{ name: 'lesson', params: { id: item.LessonId } }"
+              >{{ item.LessonId }}</router-link
+            >
+          </template>
           <template #cell(id)="data">
             <b-checkbox v-model="checked" :value="data.value" />
           </template>
@@ -38,6 +44,7 @@ import { formatDate } from "@/utils/date";
 export default {
   created() {
     this.loadWords();
+    this.loadLessons();
   },
   data() {
     return {
@@ -61,6 +68,7 @@ export default {
   },
   methods: {
     ...mapActions("words", ["loadWords", "createWord", "deleteWords"]),
+    ...mapActions("lessons", ["loadLessons"]),
     toggleCheckAll(checked) {
       this.checked =
         this.checked.length < this.words.length && checked === true

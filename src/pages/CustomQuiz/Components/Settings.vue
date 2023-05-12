@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-form>
+    <b-form @submit.prevent="$emit('start', settings)">
       <div class="row">
         <div class="col-md-2">
           <b-form-group label="Number of questions">
