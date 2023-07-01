@@ -7,6 +7,7 @@ import hayyimDictionary from "@/store/modules/hayyimDictionary";
 import texts from "@/store/modules/texts";
 import annotations from "@/store/modules/annotations";
 import settings from "@/store/modules/settings";
+import annotatedTexts from "@/store/modules/annotatedTexts";
 
 Vue.use(Vuex);
 
@@ -18,6 +19,7 @@ export default new Vuex.Store({
     texts,
     annotations,
     hayyimDictionary,
-    settings
+    settings,
+    annotatedTexts
   }
 });
