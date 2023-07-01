@@ -7,12 +7,7 @@
     </div>
     <div class="row">
       <div class="col-md-12">
-        <div>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eaque eum
-          excepturi fugiat incidunt iste minus obcaecati, perspiciatis. Aut
-          deserunt dignissimos dolorum earum maxime necessitatibus, qui quod,
-          repellat sed tempora voluptas!
-        </div>
+        <b-button @click="click">Click</b-button>
       </div>
     </div>
   </div>
@@ -20,6 +15,13 @@
 
 <script>
 export default {
-  async created() {}
+  async created() {
+    this.click();
+  },
+  methods: {
+    click() {
+      console.log("click");
+    }
+  }
 };
 </script>
