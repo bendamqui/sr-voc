@@ -46,6 +46,23 @@ const routes = [
         component: () => import("@/pages/Dashboard")
       },
       {
+        path: "/annotated-texts",
+        name: "annotated-texts",
+        component: () => import("@/pages/AnnotatedTexts")
+      },
+      {
+        path: "/annotated-text",
+        name: "annotated-text",
+        props: true,
+        component: () => import("@/pages/AnnotatedTexts/Text.vue")
+      },
+      {
+        path: "/create-annotated-text",
+        name: "create-annotated-text",
+        props: true,
+        component: () => import("@/pages/AnnotatedTexts/Form.vue")
+      },
+      {
         path: "/texts",
         name: "texts",
         component: () => import("@/pages/Texts")

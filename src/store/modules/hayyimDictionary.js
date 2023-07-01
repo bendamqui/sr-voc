@@ -6,7 +6,7 @@ const state = () => ({
 
 const getters = {
   words(state) {
-    return state.words;
+    return state.words || [];
   }
 };
 
