@@ -1,6 +1,6 @@
 {
   "name": "sr-voc",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "private": false,
   "description": "Learn vocabulary using spaced repetition algorithm",
   "author": "bendamqui@icloud.com",

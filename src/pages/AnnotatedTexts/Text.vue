@@ -6,7 +6,7 @@
       <h1 class="h2">{{ text.title }}</h1>
     </div>
     <div class="row">
-      <div class="col-md-12">
+      <div class="col-md-12 font-size-lg">
         <Word
           :key="index"
           v-for="(word, index) in text.content"

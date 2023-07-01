@@ -13,12 +13,12 @@ const createObject = () => ({
 
 const createPunctuationObject = element => {
   return [
+    toObject(element.substr(0, element.length - 1)),
     {
       ...createObject(),
       type: Punctuation,
       value: element.substr(element.length - 1)
-    },
-    toObject(element.substr(0, element.length - 1))
+    }
   ];
 };
 
