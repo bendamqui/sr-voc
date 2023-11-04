@@ -11,14 +11,6 @@
       class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom"
     >
       <h1 class="h2">Lessons</h1>
-      <div class="btn-toolbar mb-2 mb-md-0">
-        <b-button
-          @click="deleteLessons(checked)"
-          variant="danger"
-          class="float-right"
-          ><b-icon-trash
-        /></b-button>
-      </div>
     </div>
     <div class="row mb-3">
       <div class="col-6">
@@ -38,17 +30,11 @@
     <div class="row">
       <div class="col-12">
         <b-table :items="lessons" :fields="fields">
-          <template #head(id)>
-            <b-checkbox @change="toggleCheckAll" />
-          </template>
           <template #cell(name)="data">
             <router-link
-              :to="{ name: 'lesson', params: { id: data.item.id } }"
+              :to="{ name: 'lesson', params: { id: data.item._id } }"
               >{{ data.value }}</router-link
             >
-          </template>
-          <template #cell(id)="data">
-            <b-checkbox v-model="checked" :value="data.value" />
           </template>
           <template #cell(Actions)="{item}">
             <b-button
@@ -57,6 +43,13 @@
               variant="warning"
               class="mt-1 mr-2 text-white"
               ><b-icon icon="pencil" aria-label="Help"></b-icon>
+            </b-button>
+            <b-button
+              @click="handleDelete(item)"
+              size="sm"
+              variant="danger"
+              class="mt-1 mr-2 text-white"
+              ><b-icon icon="trash"></b-icon>
             </b-button>
           </template>
         </b-table>
@@ -68,52 +61,54 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import { formatDate } from "@/utils/date";
+import lessons from "../store/modules/lessons";
 export default {
   created() {
     this.loadLessons();
   },
   data() {
     return {
-      checked: [],
-      payload: { name: "" },
+      payload: { name: "", completed: false },
       editPayload: { name: "" },
+      editDocument: {},
       fields: [
-        "id",
         { key: "name", sortable: true },
         { key: "completed", sortable: true },
-        { key: "createdAt", sortable: true, formatter: formatDate },
-        { key: "updatedAt", sortable: true, formatter: formatDate },
+        { key: "created_at", sortable: true, formatter: formatDate },
+        { key: "updated_at", sortable: true, formatter: formatDate },
         "Actions"
       ]
     };
   },
   computed: {
+    lessons() {
+      return lessons;
+    },
     ...mapGetters("lessons", ["lessons"])
   },
   methods: {
     ...mapActions("lessons", [
       "loadLessons",
       "createLesson",
-      "deleteLessons",
+      "deleteLesson",
       "updateLesson"
     ]),
-    toggleCheckAll(checked) {
-      this.checked =
-        this.checked.length < this.lessons.length && checked === true
-          ? this.lessons.map(({ id }) => id)
-          : [];
-    },
-
     handleSubmit() {
       this.createLesson(this.payload).then(() => (this.payload.name = ""));
     },
-    showEditModal(item) {
+    handleDelete(doc) {
+      this.deleteLesson(doc);
+    },
+    showEditModal(document) {
+      this.editDocument = document;
+      this.editPayload.name = document.name;
       this.$bvModal.show("edit-lesson-modal");
-      const { id, name } = item;
-      this.editPayload = { id, name };
     },
     handleEditLesson() {
-      this.updateLesson(this.editPayload);
+      this.updateLesson({
+        ...this.editDocument,
+        ...this.editPayload
+      });
       this.$bvModal.hide("edit-lesson-modal");
     }
   }

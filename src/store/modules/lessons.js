@@ -1,5 +1,5 @@
-import { Lesson, Word } from "@/sqlite";
-import { Op } from "sequelize";
+import { Lessons } from "@/pouch";
+import { objectToDocument } from "@/utils/pouch";
 
 const state = () => ({
   lessons: []
@@ -21,32 +21,30 @@ const getters = {
 
 const actions = {
   loadLessons({ commit }) {
-    return Lesson.findAll({ raw: true }).then(lessons =>
-      commit("setLessons", lessons)
+    return Lessons.allDocs({ include_docs: true }).then(docs =>
+      commit("setLessons", docs)
     );
   },
   createLesson({ dispatch }, payload) {
-    return Lesson.create(payload).then(() => {
+    return Lessons.put(objectToDocument(payload)).then(() => {
       dispatch("loadLessons");
     });
   },
-  updateLesson({ dispatch }, { id, ...payload }) {
-    return Lesson.update(payload, { where: { id } }).then(() =>
-      dispatch("loadLessons")
-    );
+  updateLesson({ dispatch }, payload) {
+    return Lessons.put(objectToDocument(payload)).then(() => {
+      dispatch("loadLessons");
+    });
   },
-  deleteLessons({ dispatch }, ids) {
-    return Word.destroy({ where: { LessonId: { [Op.in]: ids } } }).then(() => {
-      return Lesson.destroy({ where: { id: { [Op.in]: ids } } }).then(() => {
-        dispatch("loadLessons");
-      });
+  deleteLesson({ dispatch }, doc) {
+    return Lessons.remove(doc).then(() => {
+      dispatch("loadLessons");
     });
   }
 };
 
 const mutations = {
-  setLessons(state, lessons) {
-    state.lessons = lessons;
+  setLessons(state, { rows }) {
+    state.lessons = rows.map(({ doc }) => doc);
   }
 };
 
