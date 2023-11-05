@@ -1,18 +1,18 @@
-import { Lessons } from "@/pouch";
+import { Lessons, Words } from "@/pouch";
 import { objectToDocument } from "@/utils/pouch";
 
 const state = () => ({
-  lessons: []
+  lessons: [],
+  lesson: {},
+  words: []
 });
 
 const getters = {
   lessons(state) {
     return state.lessons;
   },
-  getLesson(state) {
-    return id => {
-      return state.lessons.find(lesson => lesson.id === id);
-    };
+  lesson(state) {
+    return state.lesson;
   },
   lessonOptions(state) {
     return state.lessons.map(({ id, name }) => ({ id, name }));
@@ -24,6 +24,9 @@ const actions = {
     return Lessons.allDocs({ include_docs: true }).then(docs =>
       commit("setLessons", docs)
     );
+  },
+  loadLesson({ commit }, id) {
+    return Lessons.get(id).then(doc => commit("setLesson", doc));
   },
   createLesson({ dispatch }, payload) {
     return Lessons.put(objectToDocument(payload)).then(() => {
@@ -39,12 +42,27 @@ const actions = {
     return Lessons.remove(doc).then(() => {
       dispatch("loadLessons");
     });
+  },
+  loadWords({ commit }, lessonId) {
+    return Words.find({
+      selector: { lesson_id: lessonId },
+      include_docs: true
+    }).then(docs => {
+      commit("setWords", docs);
+    });
   }
 };
 
 const mutations = {
   setLessons(state, { rows }) {
     state.lessons = rows.map(({ doc }) => doc);
+  },
+  setLesson(state, doc) {
+    state.lesson = doc;
+  },
+  setWords(state, docs) {
+    console.log(docs);
+    state.words = docs;
   }
 };
 

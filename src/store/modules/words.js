@@ -1,6 +1,7 @@
-import { Op } from "sequelize";
 import { Word } from "@/sqlite";
+import { Words } from "@/pouch";
 import Chart from "chart.js";
+import { objectToDocument } from "@/utils/pouch";
 
 const state = () => ({
   words: [],
@@ -35,7 +36,9 @@ const getters = {
 
 const actions = {
   loadWords({ commit }) {
-    return Word.findAll({ raw: true }).then(docs => commit("setWords", docs));
+    return Words.allDocs({ include_docs: true }).then(docs =>
+      commit("setWords", docs)
+    );
   },
   fetchWordsByLevel({ commit }) {
     Word.wordsByLevel()
@@ -48,36 +51,44 @@ const actions = {
     );
   },
   async loadWordsToReviewCount({ commit, rootGetters }) {
-    const query = await rootGetters["settings/toSequelizeReviewQuery"];
-    return Word.selectWordsToReview(query).then(words => {
+    console.log("loadWordsToReviewCount");
+    const query = await rootGetters["settings/toPouchReviewQuery"];
+    return Words.find({
+      selector: {
+        $or: query
+      }
+    }).then(words => {
       commit("setWordsToReviewCount", words.length);
     });
   },
   loadLessonWords({ commit }, lessonId) {
-    return Word.findAll({ raw: true, where: { lessonId } }).then(docs =>
-      commit("setWords", docs)
-    );
+    return Words.find({
+      selector: { lesson_id: lessonId },
+      include_docs: true
+    }).then(docs => {
+      commit("setWords", docs);
+    });
   },
-  updateWord({ dispatch }, { LessonId, id, ...payload }) {
-    return Word.update(payload, { where: { id } }).then(() =>
-      dispatch("loadLessonWords", LessonId)
+  updateWord({ dispatch }, doc) {
+    return Words.put(objectToDocument(doc)).then(() =>
+      dispatch("loadLessonWords", doc.lesson_id)
     );
   },
   createWord({ dispatch }, payload) {
-    return Word.create(payload).then(() =>
-      dispatch("loadLessonWords", payload.LessonId)
+    return Words.put(objectToDocument(payload)).then(() =>
+      dispatch("loadLessonWords", payload.lesson_id)
     );
   },
-  deleteWords({ dispatch }, { ids, LessonId }) {
-    return Word.destroy({ where: { id: { [Op.in]: ids } } }).then(() => {
-      dispatch("loadLessonWords", LessonId);
+  deleteWords({ dispatch }, doc) {
+    return Words.remove(doc).then(() => {
+      dispatch("loadLessonWords", doc.lesson_id);
     });
   }
 };
 
 const mutations = {
-  setWords(state, words) {
-    state.words = words;
+  setWords(state, { docs }) {
+    state.words = docs;
   },
   setWordsByLevel(state, data) {
     state.wordsByLevel = data;

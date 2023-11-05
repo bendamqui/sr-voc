@@ -28,10 +28,8 @@
         <b-badge variant="success" pill>{{ words.length }}</b-badge>
       </h1>
       <div class="btn-toolbar mb-2 mb-md-0">
-        <router-link
-          class="mr-2 btn btn-success"
-          :to="{ name: 'learn', params: { id: id } }"
-          >Learn</router-link
+        <b-button variant="info" class="mr-2" v-b-modal.full-screen-modal
+          >Learn</b-button
         >
         <b-button @click="handleDeleteWord" variant="danger" class="float-right"
           ><b-icon-trash
@@ -65,24 +63,36 @@
           </b-button>
         </form>
       </div>
+      <div class="col-4">
+        <b-form @submit.prevent="handleSearch" class="form-inline float-right">
+          <b-form-input
+            type="text"
+            v-model="search"
+            class="mr-2"
+            placeholder="Search to Dictionary"
+          />
+          <b-button type="submit" variant="success" class="float-right">
+            <b-icon-search />
+          </b-button>
+        </b-form>
+      </div>
     </div>
     <div class="row">
       <div class="col-12">
         <b-table :items="words" :fields="fields">
+          <template #head(id)>
+            <b-checkbox @change="toggleCheckAll" />
+          </template>
+          <template #cell(id)="data">
+            <b-checkbox v-model="checked" :value="data.value" />
+          </template>
           <template #cell(Actions)="{item}">
             <b-button
               @click="showEditModal(item)"
               size="sm"
               variant="warning"
               class="mt-1 mr-2 text-white"
-              ><b-icon icon="pencil"></b-icon>
-            </b-button>
-            <b-button
-              @click="handleDeleteWord(item)"
-              size="sm"
-              variant="danger"
-              class="mt-1 mr-2 text-white"
-              ><b-icon icon="trash"></b-icon>
+              ><b-icon icon="pencil" aria-label="Help"></b-icon>
             </b-button>
           </template>
         </b-table>
@@ -100,38 +110,34 @@ export default {
   props: {
     id: {
       required: true,
-      type: String
+      type: [Number, String]
     }
   },
   created() {
     this.loadLessonWords(this.id);
-    this.loadLesson(this.id);
+    this.lesson = this.getLesson(this.id);
   },
   data() {
     return {
-      payload: {
-        source: "",
-        target: "",
-        pronunciation: "",
-        level: 0,
-        last_attempt: null
-      },
+      lesson: {},
+      search: "",
+      checked: [],
+      payload: { source: "", target: "", pronunciation: "" },
       editPayload: {},
       fields: [
+        "id",
         { key: "source", sortable: true },
         { key: "target", sortable: true },
         { key: "pronunciation", sortable: true },
-        { key: "level", sortable: true },
-        { key: "last_attempt", sortable: true, formatter: formatDate },
-        { key: "created_at", sortable: true, formatter: formatDate },
-        { key: "updated_at", sortable: true, formatter: formatDate },
+        { key: "createdAt", sortable: true, formatter: formatDate },
+        { key: "updatedAt", sortable: true, formatter: formatDate },
         "Actions"
       ]
     };
   },
   computed: {
     ...mapGetters("words", ["words"]),
-    ...mapGetters("lessons", ["lesson"])
+    ...mapGetters("lessons", ["getLesson"])
   },
   methods: {
     ...mapActions("words", [
@@ -140,28 +146,37 @@ export default {
       "deleteWords",
       "updateWord"
     ]),
-    ...mapActions("lessons", ["loadLesson"]),
+    toggleCheckAll(checked) {
+      this.checked =
+        this.checked.length < this.words.length && checked === true
+          ? this.words.map(({ id }) => id)
+          : [];
+    },
     handleSubmit() {
-      this.createWord({ ...this.payload, lesson_id: this.id }).then(() => {
-        this.payload = {
-          source: "",
-          target: "",
-          pronunciation: "",
-          level: 0,
-          last_attempt: null
-        };
+      this.createWord({ ...this.payload, LessonId: this.id }).then(() => {
+        this.payload = { source: "", target: "", pronunciation: "" };
         this.$refs.source.focus();
       });
     },
-    showEditModal(doc) {
-      this.$bvModal.show("edit-word-modal");
-      this.editPayload = Object.assign({}, doc);
+    handleSearch() {
+      console.log(this.search);
     },
-    handleDeleteWord(doc) {
-      this.deleteWords(doc);
+    showEditModal(item) {
+      this.$bvModal.show("edit-word-modal");
+      const { id, source, target, pronunciation } = item;
+      this.editPayload = { id, source, pronunciation, target };
+    },
+    handleDeleteWord() {
+      this.deleteWords({
+        ids: this.checked,
+        LessonId: this.id
+      });
     },
     handleEditWord() {
-      this.updateWord(this.editPayload);
+      this.updateWord({
+        ...this.editPayload,
+        LessonId: this.id
+      });
       this.$bvModal.hide("edit-word-modal");
     }
   }

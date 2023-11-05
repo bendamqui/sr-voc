@@ -15,6 +15,19 @@ const getDateFunction = input => {
   }
 };
 
+const periodToMillisecond = (period, value) => {
+  switch (period) {
+    case "hour":
+      return 60 * 60 * 1000 * value;
+    case "day":
+      return 60 * 60 * 24 * 1000 * value;
+    case "month":
+      return 60 * 60 * 24 * 30 * 1000 * value;
+    case "year":
+      return 60 * 60 * 24 * 365 * 1000 * value;
+  }
+};
+
 const defaultReviewSettings = [
   { level: 1, value: 4, operator: "=", period: "hour" },
   { level: 2, value: 1, operator: "=", period: "day" },
@@ -33,6 +46,18 @@ const state = () => ({
 const getters = {
   review(state) {
     return state.review.sort((a, b) => a.index - b.index);
+  },
+  toPouchReviewQuery(state) {
+    const opMap = {
+      "=": "$eq",
+      ">": "$gt"
+    };
+    return state.review.map(({ operator, level, period, value }) => {
+      return {
+        level: { [opMap[operator]]: level },
+        last_attempt: { $lt: Date.now() - periodToMillisecond(period, value) }
+      };
+    });
   },
   toSequelizeReviewQuery(state) {
     const opMap = {

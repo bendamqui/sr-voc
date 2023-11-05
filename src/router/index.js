@@ -20,6 +20,12 @@ const routes = [
         props: true
       },
       {
+        path: "/lessons/:id/learn",
+        name: "learn",
+        component: () => import("@/pages/Lessons/Learn"),
+        props: true
+      },
+      {
         path: "/words",
         name: "words",
         component: () => import("@/pages/Words")
@@ -93,6 +99,11 @@ const routes = [
         path: "/settings",
         name: "settings",
         component: () => import("@/pages/Settings/index")
+      },
+      {
+        path: "/review",
+        name: "review",
+        component: () => import("@/pages/Review")
       }
     ]
   },

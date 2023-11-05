@@ -15,8 +15,16 @@ import "./assets/dashboard.css";
 import { mapActions } from "vuex";
 import { format } from "date-fns";
 import { sequelize, sync } from "./sqlite";
-
+import PouchDB from "pouchdb-browser";
+import find from "pouchdb-find";
+import { Words } from "@/pouch";
 (async () => {
+  PouchDB.plugin(find);
+  Words.createIndex({
+    index: {
+      fields: ["lesson_id"]
+    }
+  });
   await store.dispatch("settings/init");
   await sequelize
     .authenticate()
