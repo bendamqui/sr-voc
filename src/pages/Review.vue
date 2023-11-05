@@ -29,8 +29,9 @@ import Results from "@/pages/CustomQuiz/Components/Results.vue";
 
 export default {
   components: { QuizInputForm, ProgressBar, Results },
-  created() {
-    this.start();
+  async created() {
+    await this.fetch();
+    await this.start();
   },
   data() {
     return {
@@ -42,12 +43,10 @@ export default {
   },
   methods: {
     ...mapActions("resultsLog", ["createResult"]),
+    ...mapActions("settings", ["fetch"]),
     async start() {
       const { docs } = await Words.find({
-        selector: {
-          $or: this.toPouchReviewQuery
-        },
-        include_docs: true
+        ...this.toPouchReviewQuery
       });
       this.quiz = createObservableQuizWithSteps(
         docs,
@@ -70,7 +69,8 @@ export default {
       const word = await Words.get(question._id);
       Words.put({
         ...word,
-        level: result ? word.level + 1 : 0
+        level: result ? word.level + 1 : 0,
+        last_attempt: Date.now()
       });
       await this.createResult({
         word_id: question._id,

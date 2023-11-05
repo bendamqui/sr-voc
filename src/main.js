@@ -12,17 +12,23 @@ import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 import "./assets/dashboard.css";
-import { mapActions } from "vuex";
+import { mapActions, mapMutations } from "vuex";
 import { format } from "date-fns";
 import { sequelize, sync } from "./sqlite";
 import PouchDB from "pouchdb-browser";
 import find from "pouchdb-find";
 import { Words } from "@/pouch";
+
 (async () => {
   PouchDB.plugin(find);
   Words.createIndex({
     index: {
       fields: ["lesson_id"]
+    }
+  });
+  Words.createIndex({
+    index: {
+      fields: ["level", "last_attempt"]
     }
   });
   await store.dispatch("settings/init");
@@ -52,16 +58,21 @@ import { Words } from "@/pouch";
     data: () => ({ worker: undefined }),
     async created() {
       await this.fetch();
-      await this.loadWordsToReviewCount();
-      this.worker = setInterval(() => {
-        this.loadWordsToReviewCount();
-      }, 1000 * 5);
+      this.worker = setInterval(async () => {
+        await this.loadWordsToReviewCount();
+        /*const { rows } = await ReviewSettings.allDocs({ include_docs: true });
+        const settings = settingsToReviewQuery(rows.map(({ doc }) => doc));
+        Words.find(settings).then(({ docs }) => {
+          this.setWordsToReviewCount(docs.length);
+        });*/
+      }, 1000);
     },
     beforeDestroy() {
       clearInterval(this.worker);
     },
     methods: {
       ...mapActions("words", ["loadWordsToReviewCount"]),
+      ...mapMutations("words", ["setWordsToReviewCount"]),
       ...mapActions("settings", ["fetch"])
     }
   }).$mount("#app");

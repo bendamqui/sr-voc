@@ -51,14 +51,9 @@ const actions = {
     );
   },
   async loadWordsToReviewCount({ commit, rootGetters }) {
-    console.log("loadWordsToReviewCount");
     const query = await rootGetters["settings/toPouchReviewQuery"];
-    return Words.find({
-      selector: {
-        $or: query
-      }
-    }).then(words => {
-      commit("setWordsToReviewCount", words.length);
+    return Words.find(query).then(({ docs }) => {
+      commit("setWordsToReviewCount", docs.length);
     });
   },
   loadLessonWords({ commit }, lessonId) {

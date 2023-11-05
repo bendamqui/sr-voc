@@ -1,8 +1,6 @@
-import PouchDB from "pouchdb-browser";
+import { ReviewSettings } from "@/pouch";
 import { Op } from "sequelize";
 import { subDays, subHours, subYears } from "date-fns";
-
-const db = new PouchDB("review_settings");
 
 const getDateFunction = input => {
   switch (input) {
@@ -52,12 +50,18 @@ const getters = {
       "=": "$eq",
       ">": "$gt"
     };
-    return state.review.map(({ operator, level, period, value }) => {
-      return {
-        level: { [opMap[operator]]: level },
-        last_attempt: { $lt: Date.now() - periodToMillisecond(period, value) }
-      };
-    });
+    return {
+      selector: {
+        $or: state.review.map(({ operator, level, period, value }) => {
+          return {
+            level: { [opMap[operator]]: level },
+            last_attempt: {
+              $lt: Date.now() - periodToMillisecond(period, value)
+            }
+          };
+        })
+      }
+    };
   },
   toSequelizeReviewQuery(state) {
     const opMap = {
@@ -78,15 +82,15 @@ const getters = {
 
 const actions = {
   fetch({ commit }) {
-    return db
-      .allDocs({ include_docs: true })
-      .then(docs => commit("setReview", docs));
+    return ReviewSettings.allDocs({ include_docs: true }).then(docs =>
+      commit("setReview", docs)
+    );
   },
   init() {
-    return db.allDocs({ include_docs: true }).then(docs => {
+    return ReviewSettings.allDocs({ include_docs: true }).then(docs => {
       if (docs.total_rows === 0) {
         defaultReviewSettings.forEach((doc, index) => {
-          db.post({
+          ReviewSettings.post({
             ...doc,
             index
           });
@@ -96,7 +100,7 @@ const actions = {
   },
   async save({ dispatch }, settings) {
     await settings.map(async setting => {
-      await db.put(setting);
+      await ReviewSettings.put(setting);
     });
     await dispatch("init");
   }
