@@ -1,6 +1,5 @@
 import { ResultsLog, Words } from "@/pouch";
 import Chart from "chart.js";
-import { objectToDocument } from "@/utils/pouch";
 
 const state = () => ({
   words: [],
@@ -35,9 +34,10 @@ const getters = {
 
 const actions = {
   loadWords({ commit }) {
-    return Words.allDocs({ include_docs: true }).then(docs =>
-      commit("setWords", docs)
-    );
+    return Words.find({
+      selector: { level: { $gte: -1 } },
+      include_docs: true
+    }).then(docs => commit("setWords", docs));
   },
   fetchWordsByLevel({ commit }) {
     return Words.query(
@@ -85,29 +85,6 @@ const actions = {
     const query = await rootGetters["settings/toPouchReviewQuery"];
     return Words.find(query).then(({ docs }) => {
       commit("setWordsToReviewCount", docs.length);
-    });
-  },
-  loadLessonWords({ commit }, lessonId) {
-    return Words.find({
-      selector: { lesson_id: lessonId },
-      include_docs: true
-    }).then(docs => {
-      commit("setWords", docs);
-    });
-  },
-  updateWord({ dispatch }, doc) {
-    return Words.put(objectToDocument(doc)).then(() =>
-      dispatch("loadLessonWords", doc.lesson_id)
-    );
-  },
-  createWord({ dispatch }, payload) {
-    return Words.put(objectToDocument(payload)).then(() =>
-      dispatch("loadLessonWords", payload.lesson_id)
-    );
-  },
-  deleteWords({ dispatch }, doc) {
-    return Words.remove(doc).then(() => {
-      dispatch("loadLessonWords", doc.lesson_id);
     });
   }
 };

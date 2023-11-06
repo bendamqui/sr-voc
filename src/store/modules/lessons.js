@@ -16,6 +16,9 @@ const getters = {
   },
   lessonOptions(state) {
     return state.lessons.map(({ id, name }) => ({ id, name }));
+  },
+  words(state) {
+    return state.words;
   }
 };
 
@@ -43,6 +46,11 @@ const actions = {
       dispatch("loadLessons");
     });
   },
+  createWord({ dispatch }, payload) {
+    return Words.put(objectToDocument(payload))
+      .then(() => dispatch("loadWords", payload.lesson_id))
+      .catch(e => console.log(e));
+  },
   loadWords({ commit }, lessonId) {
     return Words.find({
       selector: { lesson_id: lessonId },
@@ -50,6 +58,16 @@ const actions = {
     }).then(docs => {
       commit("setWords", docs);
     });
+  },
+  deleteWords({ dispatch }, doc) {
+    return Words.put({ ...doc, _deleted: true }).then(() => {
+      dispatch("loadWords", doc.lesson_id);
+    });
+  },
+  updateWord({ dispatch }, doc) {
+    return Words.put(objectToDocument(doc)).then(() =>
+      dispatch("loadWords", doc.lesson_id)
+    );
   }
 };
 
@@ -60,8 +78,7 @@ const mutations = {
   setLesson(state, doc) {
     state.lesson = doc;
   },
-  setWords(state, docs) {
-    console.log(docs);
+  setWords(state, { docs }) {
     state.words = docs;
   }
 };

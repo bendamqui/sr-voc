@@ -104,7 +104,7 @@ export default {
     }
   },
   created() {
-    this.loadLessonWords(this.id);
+    this.loadWords(this.id);
     this.loadLesson(this.id);
   },
   data() {
@@ -130,17 +130,16 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("words", ["words"]),
-    ...mapGetters("lessons", ["lesson"])
+    ...mapGetters("lessons", ["lesson", "words"])
   },
   methods: {
-    ...mapActions("words", [
-      "loadLessonWords",
+    ...mapActions("lessons", [
+      "loadLesson",
+      "loadWords",
       "createWord",
-      "deleteWords",
-      "updateWord"
+      "updateWord",
+      "deleteWords"
     ]),
-    ...mapActions("lessons", ["loadLesson"]),
     handleSubmit() {
       this.createWord({ ...this.payload, lesson_id: this.id }).then(() => {
         this.payload = {

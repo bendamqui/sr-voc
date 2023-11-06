@@ -35,11 +35,7 @@ const routes = [
         name: "difficult",
         component: () => import("@/pages/DifficultWords")
       },
-      {
-        path: "/dictionary",
-        name: "dictionary",
-        component: () => import("@/pages/Dictionary")
-      },
+
       {
         path: "/example",
         name: "example",

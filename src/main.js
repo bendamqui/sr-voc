@@ -17,10 +17,10 @@ import { format } from "date-fns";
 import { sequelize, sync } from "./sqlite";
 import PouchDB from "pouchdb-browser";
 import find from "pouchdb-find";
+PouchDB.plugin(find);
 import { Words } from "@/pouch";
 
 (async () => {
-  PouchDB.plugin(find);
   Words.createIndex({
     index: {
       fields: ["lesson_id"]
@@ -60,11 +60,6 @@ import { Words } from "@/pouch";
       await this.fetch();
       this.worker = setInterval(async () => {
         await this.loadWordsToReviewCount();
-        /*const { rows } = await ReviewSettings.allDocs({ include_docs: true });
-        const settings = settingsToReviewQuery(rows.map(({ doc }) => doc));
-        Words.find(settings).then(({ docs }) => {
-          this.setWordsToReviewCount(docs.length);
-        });*/
       }, 1000);
     },
     beforeDestroy() {

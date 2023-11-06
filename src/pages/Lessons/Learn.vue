@@ -34,8 +34,7 @@ import Qcm from "@/components/Quizzes/Qcm.vue";
 export default {
   props: {
     id: {
-      required: false,
-      default: "411cb698-dece-4b2e-9a16-3c7d0c4c8bba"
+      required: true
     }
   },
   components: { Qcm, QuizInputForm, ProgressBar, Results },

@@ -9,18 +9,29 @@
       <div class="col-md-12">
         <b-button @click="click">Click</b-button>
       </div>
+      <pre>{{ debug }}</pre>
     </div>
   </div>
 </template>
 
 <script>
+import { Words } from "@/pouch";
+
 export default {
   async created() {
     this.click();
   },
+  data() {
+    return { debug: null };
+  },
   methods: {
     click() {
-      console.log("click");
+      Words.allDocs({
+        include_docs: true,
+        end_key: "_design"
+      }).then(docs => {
+        this.debug = docs;
+      });
     }
   }
 };
