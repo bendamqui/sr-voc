@@ -139,7 +139,7 @@ export default {
   components: { Multiselect },
   props: {
     id: {
-      type: Number,
+      type: String,
       required: true
     }
   },

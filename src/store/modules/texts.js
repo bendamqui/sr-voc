@@ -1,5 +1,5 @@
-import { Text } from "@/sqlite";
-import { Op } from "sequelize";
+import { Texts } from "@/pouch";
+import { objectToDocument } from "@/utils/pouch";
 
 const state = () => ({
   texts: []
@@ -18,28 +18,33 @@ const getters = {
 
 const actions = {
   loadTexts({ commit }) {
-    return Text.findAll({ raw: true }).then(texts => commit("setTexts", texts));
+    return Texts.allDocs({ include_docs: true }).then(texts =>
+      commit("setTexts", texts)
+    );
   },
   createText({ dispatch }, payload) {
-    return Text.create(payload).then(() => {
+    return Texts.put(objectToDocument(payload)).then(() => {
       dispatch("loadTexts");
     });
   },
-  updateText({ dispatch }, { id, ...payload }) {
-    return Text.update(payload, { where: { id } }).then(() =>
+  updateText({ dispatch }, payload) {
+    return Texts.put(objectToDocument(payload)).then(() =>
       dispatch("loadTexts")
     );
   },
-  deleteTexts({ dispatch }, ids) {
-    return Text.destroy({ where: { id: { [Op.in]: ids } } }).then(() => {
+  deleteText({ dispatch }, payload) {
+    return Texts.put({
+      ...payload,
+      _deleted: true
+    }).then(() => {
       dispatch("loadTexts");
     });
   }
 };
 
 const mutations = {
-  setTexts(state, texts) {
-    state.texts = texts;
+  setTexts(state, { rows }) {
+    state.texts = rows.map(({ doc }) => doc);
   }
 };
 
