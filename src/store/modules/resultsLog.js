@@ -19,6 +19,29 @@ const actions = {
   },
   createResult(context, payload) {
     return ResultsLog.put(objectToDocument(payload));
+  },
+  async logResult(context, { _id, result, type, answer }) {
+    let document;
+    const payload = {
+      result,
+      type,
+      answer,
+      created_at: Date.now()
+    };
+    try {
+      document = await ResultsLog.get(_id);
+      document.log.push(payload);
+    } catch (e) {
+      if (e.name === "not_found") {
+        document = {
+          _id,
+          log: [payload]
+        };
+      } else {
+        throw e;
+      }
+    }
+    return ResultsLog.put(objectToDocument(document));
   }
 };
 

@@ -3,6 +3,8 @@
 - [ ] Improve QCM ui
 - [ ] Write tests
 - [ ] Consolidate json properties case on import/export
+- [ ] Pouch use views
+- [ ] magoqueries use_index
 
 # Backlog
 - [ ] fix the app icon (build/icon.icns)
@@ -29,4 +31,7 @@ The json object must have the following attributes
 }
 
 The text is as follow:  ""
+
+
+
 

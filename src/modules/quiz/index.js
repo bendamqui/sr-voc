@@ -143,7 +143,7 @@ export const createObservableQuizWithSteps = (words, steps, options) => {
           ...this.question,
           result
         });
-        options.afterValidation(this.question, result);
+        options.afterValidation(this.question, result, this.answer);
         result ? this.handleSuccess() : this.handleFailure();
       },
       handleFailure() {

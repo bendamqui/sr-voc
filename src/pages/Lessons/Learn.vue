@@ -5,7 +5,6 @@
     >
       <h1 class="h2">Learn word from: {{ lesson.name }}</h1>
     </div>
-    <pre>{{ lesson }}</pre>
     <ProgressBar v-if="quiz.started" :stats="quiz.progress" />
     <div v-if="quiz.started && !quiz.done">
       <QuizInputForm v-if="showInputForm" :quiz="quiz" />
@@ -41,6 +40,7 @@ export default {
   },
   components: { Qcm, QuizInputForm, ProgressBar, Results },
   created() {
+    this.loadResults();
     this.loadLesson(this.id);
     this.start();
   },
@@ -54,6 +54,7 @@ export default {
       return this.lesson;
     },
     ...mapGetters("lessons", ["lesson"]),
+    ...mapGetters("resultsLog", ["results"]),
     showInputForm() {
       return (
         this.quiz.started && this.quiz.step.questionType === QUESTION_TYPE.INPUT
@@ -67,7 +68,7 @@ export default {
   },
   methods: {
     ...mapActions("lessons", ["loadLesson", "updateLesson"]),
-    ...mapActions("resultsLog", ["createResult"]),
+    ...mapActions("resultsLog", ["createResult", "logResult", "loadResults"]),
     async start() {
       const { docs } = await Words.find({
         selector: { lesson_id: this.id },
@@ -118,11 +119,12 @@ export default {
         }
       };
     },
-    saveResult(question, result) {
-      this.createResult({
-        word_id: question._id,
+    saveResult(question, result, answer) {
+      this.logResult({
+        _id: question._id,
         type: "learn",
-        result
+        result,
+        answer
       });
     }
   }

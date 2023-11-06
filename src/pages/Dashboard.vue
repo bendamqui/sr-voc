@@ -8,7 +8,7 @@
 
     <div class="row">
       <div class="col-md-12">
-        <Bar :styles="{ height: '400px' }" :chart-data="wordsByLevel" />
+        <Bar :styles="{ height: '400px' }" :chart-data="wordsByLevelToChart" />
       </div>
     </div>
   </div>
@@ -17,14 +17,13 @@
 <script>
 import Bar from "@/components/Charts/Bar";
 import { mapActions, mapGetters } from "vuex";
-
 export default {
   components: { Bar },
   created() {
     this.fetchWordsByLevel();
   },
   computed: {
-    ...mapGetters("words", ["wordsByLevel"])
+    ...mapGetters("words", ["wordsByLevelToChart"])
   },
   methods: {
     ...mapActions("words", ["fetchWordsByLevel"])

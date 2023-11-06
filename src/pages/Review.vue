@@ -42,7 +42,7 @@ export default {
     ...mapGetters("settings", ["toPouchReviewQuery"])
   },
   methods: {
-    ...mapActions("resultsLog", ["createResult"]),
+    ...mapActions("resultsLog", ["logResult"]),
     ...mapActions("settings", ["fetch"]),
     async start() {
       const { docs } = await Words.find({
@@ -65,17 +65,18 @@ export default {
       this.quiz.start();
     },
     // @todo pass isRetrying argument instead of setting level to 0
-    async saveResult(question, result) {
+    async saveResult(question, result, answer) {
       const word = await Words.get(question._id);
       Words.put({
         ...word,
         level: result ? word.level + 1 : 0,
         last_attempt: Date.now()
       });
-      await this.createResult({
-        word_id: question._id,
+      await this.logResult({
+        _id: question._id,
         type: "review",
-        result
+        result,
+        answer
       });
     }
   }

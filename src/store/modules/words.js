@@ -1,5 +1,4 @@
-import { Word } from "@/sqlite";
-import { Words } from "@/pouch";
+import { ResultsLog, Words } from "@/pouch";
 import Chart from "chart.js";
 import { objectToDocument } from "@/utils/pouch";
 
@@ -14,12 +13,12 @@ const getters = {
   words(state) {
     return state.words;
   },
-  wordsByLevel(state) {
+  wordsByLevelToChart(state) {
     return {
-      labels: state.wordsByLevel.map(({ level }) => `Level ${level}`),
+      labels: state.wordsByLevel.map(({ key }) => `Level ${key}`),
       datasets: [
         {
-          data: state.wordsByLevel.map(({ count }) => count),
+          data: state.wordsByLevel.map(({ value }) => value),
           backgroundColor: Chart["colorschemes"].tableau.Tableau10,
           borderWidth: 1
         }
@@ -41,14 +40,46 @@ const actions = {
     );
   },
   fetchWordsByLevel({ commit }) {
-    Word.wordsByLevel()
-      .then(data => commit("setWordsByLevel", data))
-      .catch(e => console.log(e));
+    return Words.query(
+      {
+        map: function(doc, emit) {
+          emit(doc.level);
+        },
+        reduce: "_count"
+      },
+      { reduce: true, group: true }
+    ).then(({ rows }) => {
+      commit("setWordsByLevel", rows);
+    });
   },
-  loadDifficultWords({ commit }) {
-    return Word.selectDifficult().then(docs =>
-      commit("setDifficultWords", docs)
-    );
+  async loadDifficultWords({ commit }) {
+    const { rows: stats } = await ResultsLog.query({
+      map: function(doc, emit) {
+        const attempts = doc.log.length;
+        const sum = doc.log.reduce(
+          (acc, { result }) => acc + (result ? 1 : 0),
+          0
+        );
+        const ratio = sum / attempts;
+        if (ratio < 0.7) {
+          emit(doc._id, [{ attempts, sum, ratio }]);
+        }
+      }
+    });
+    const statsMap = stats.reduce((acc, value) => {
+      acc[value.key] = value;
+      return acc;
+    }, {});
+    const { docs: words } = await Words.find({
+      selector: {
+        _id: { $in: stats.map(({ key }) => key) }
+      }
+    });
+    const res = words.map(word => {
+      word.value = statsMap[word._id].value[0];
+      return word;
+    });
+    commit("setDifficultWords", res);
   },
   async loadWordsToReviewCount({ commit, rootGetters }) {
     const query = await rootGetters["settings/toPouchReviewQuery"];
