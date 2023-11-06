@@ -86,6 +86,11 @@ const actions = {
     return Words.find(query).then(({ docs }) => {
       commit("setWordsToReviewCount", docs.length);
     });
+  },
+  deleteWord({ dispatch }, doc) {
+    Words.put({ ...doc, _deleted: true }).then(() => {
+      dispatch("loadWords");
+    });
   }
 };
 
