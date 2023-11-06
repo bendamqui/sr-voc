@@ -25,7 +25,7 @@
           </template>
 
           <template #cell(Actions)="{item}">
-            <router-link :to="{ name: 'createText', params: { id: item.id } }">
+            <router-link :to="{ name: 'createText', params: { id: item._id } }">
               <b-button size="sm" variant="warning" class="mt-1 mr-2 text-white"
                 ><b-icon icon="pencil" aria-label="Help"></b-icon>
               </b-button>

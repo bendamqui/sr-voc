@@ -73,13 +73,13 @@ const routes = [
         path: "/text",
         name: "text",
         props: true,
-        component: () => import("@/pages/Text")
+        component: () => import("@/pages/Texts/Text.vue")
       },
       {
         path: "/create-text",
         name: "createText",
         props: true,
-        component: () => import("@/pages/CreateText")
+        component: () => import("@/pages/Texts/Form.vue")
       },
       {
         path: "/sandbox",

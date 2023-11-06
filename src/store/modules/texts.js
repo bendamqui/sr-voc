@@ -2,7 +2,8 @@ import { Texts } from "@/pouch";
 import { objectToDocument } from "@/utils/pouch";
 
 const state = () => ({
-  texts: []
+  texts: [],
+  text: ""
 });
 
 const getters = {
@@ -10,9 +11,7 @@ const getters = {
     return state.texts;
   },
   text(state) {
-    return id => {
-      return state.texts.find(text => text.id === id);
-    };
+    return state.text;
   }
 };
 
@@ -21,6 +20,9 @@ const actions = {
     return Texts.allDocs({ include_docs: true }).then(texts =>
       commit("setTexts", texts)
     );
+  },
+  loadText({ commit }, id) {
+    return Texts.get(id).then(doc => commit("setText", doc));
   },
   createText({ dispatch }, payload) {
     return Texts.put(objectToDocument(payload)).then(() => {
@@ -45,6 +47,9 @@ const actions = {
 const mutations = {
   setTexts(state, { rows }) {
     state.texts = rows.map(({ doc }) => doc);
+  },
+  setText(state, doc) {
+    state.text = doc;
   }
 };
 
