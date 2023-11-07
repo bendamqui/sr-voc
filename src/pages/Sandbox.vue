@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { Words } from "@/pouch";
+import { ResultsLog } from "@/pouch";
 
 export default {
   async created() {
@@ -26,9 +26,8 @@ export default {
   },
   methods: {
     click() {
-      Words.allDocs({
-        include_docs: true,
-        end_key: "_design"
+      ResultsLog.allDocs({
+        include_docs: true
       }).then(docs => {
         this.debug = docs;
       });

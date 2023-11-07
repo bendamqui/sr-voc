@@ -4,7 +4,7 @@
 - [ ] Write tests
 - [ ] Consolidate json properties case on import/export
 - [ ] Pouch use views
-- [ ] magoqueries use_index
+- [ ] mango queries use_index
 
 # Backlog
 - [ ] fix the app icon (build/icon.icns)
