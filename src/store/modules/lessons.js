@@ -1,52 +1,85 @@
-import { Lesson, Word } from "@/sqlite";
-import { Op } from "sequelize";
+import { Lessons, Words } from "@/pouch";
+import { objectToDocument } from "@/utils/pouch";
 
 const state = () => ({
-  lessons: []
+  lessons: [],
+  lesson: {},
+  words: []
 });
 
 const getters = {
   lessons(state) {
     return state.lessons;
   },
-  getLesson(state) {
-    return id => {
-      return state.lessons.find(lesson => lesson.id === id);
-    };
+  lesson(state) {
+    return state.lesson;
   },
   lessonOptions(state) {
     return state.lessons.map(({ id, name }) => ({ id, name }));
+  },
+  words(state) {
+    return state.words;
   }
 };
 
 const actions = {
   loadLessons({ commit }) {
-    return Lesson.findAll({ raw: true }).then(lessons =>
-      commit("setLessons", lessons)
+    return Lessons.allDocs({ include_docs: true }).then(docs =>
+      commit("setLessons", docs)
     );
   },
+  loadLesson({ commit }, id) {
+    return Lessons.get(id).then(doc => commit("setLesson", doc));
+  },
   createLesson({ dispatch }, payload) {
-    return Lesson.create(payload).then(() => {
+    return Lessons.put(objectToDocument(payload)).then(() => {
       dispatch("loadLessons");
     });
   },
-  updateLesson({ dispatch }, { id, ...payload }) {
-    return Lesson.update(payload, { where: { id } }).then(() =>
-      dispatch("loadLessons")
-    );
-  },
-  deleteLessons({ dispatch }, ids) {
-    return Word.destroy({ where: { LessonId: { [Op.in]: ids } } }).then(() => {
-      return Lesson.destroy({ where: { id: { [Op.in]: ids } } }).then(() => {
-        dispatch("loadLessons");
-      });
+  updateLesson({ dispatch }, payload) {
+    return Lessons.put(objectToDocument(payload)).then(() => {
+      dispatch("loadLessons");
     });
+  },
+  deleteLesson({ dispatch }, doc) {
+    return Lessons.remove(doc).then(() => {
+      dispatch("loadLessons");
+    });
+  },
+  createWord({ dispatch }, payload) {
+    return Words.put(objectToDocument(payload))
+      .then(() => dispatch("loadWords", payload.lesson_id))
+      .catch(e => console.log(e));
+  },
+  loadWords({ commit }, lessonId) {
+    return Words.find({
+      selector: { lesson_id: lessonId },
+      include_docs: true
+    }).then(docs => {
+      commit("setWords", docs);
+    });
+  },
+  deleteWords({ dispatch }, doc) {
+    return Words.put({ ...doc, _deleted: true }).then(() => {
+      dispatch("loadWords", doc.lesson_id);
+    });
+  },
+  updateWord({ dispatch }, doc) {
+    return Words.put(objectToDocument(doc)).then(() =>
+      dispatch("loadWords", doc.lesson_id)
+    );
   }
 };
 
 const mutations = {
-  setLessons(state, lessons) {
-    state.lessons = lessons;
+  setLessons(state, { rows }) {
+    state.lessons = rows.map(({ doc }) => doc);
+  },
+  setLesson(state, doc) {
+    state.lesson = doc;
+  },
+  setWords(state, { docs }) {
+    state.words = docs;
   }
 };
 

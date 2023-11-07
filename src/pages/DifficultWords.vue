@@ -24,6 +24,7 @@ export default {
   },
   data() {
     return {
+      debug: [],
       checked: [],
       payload: { source: "", target: "", pronunciation: "" },
       fields: [
@@ -31,9 +32,14 @@ export default {
         { key: "target", sortable: true },
         { key: "pronunciation", sortable: true },
         { key: "level", sortable: true },
-        { key: "Results.success", label: "Success", sortable: true },
-        { key: "Results.attempts", label: "Attempts", sortable: true },
-        { key: "Results.ratio", label: "Ratio %", sortable: true }
+        { key: "value.sum", label: "Success", sortable: true },
+        { key: "value.attempts", label: "Attempts", sortable: true },
+        {
+          key: "value.ratio",
+          label: "Ratio %",
+          sortable: true,
+          formatter: value => Math.round(value * 100)
+        }
       ]
     };
   },
@@ -41,7 +47,8 @@ export default {
     ...mapGetters("words", ["difficultWords"])
   },
   methods: {
-    ...mapActions("words", ["loadDifficultWords"])
+    ...mapActions("words", ["loadDifficultWords"]),
+    async sandbox() {}
   }
 };
 </script>

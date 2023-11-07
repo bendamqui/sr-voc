@@ -1,5 +1,6 @@
 import { shuffle, extractChoices } from "@/modules/quiz/utils";
 import { DIRECTION, QUESTION_TYPE } from "@/modules/quiz/types";
+import { arrayIterator } from "@/utils/iterators";
 
 const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x);
 
@@ -43,7 +44,7 @@ const createQuestions = (words, options) => {
     applyDirection(options),
     applyQuestionType(options),
     shuffle
-  )(words);
+  )([...words]);
 };
 
 export const createQuiz = (words, options) => {
@@ -76,6 +77,93 @@ export const createQuiz = (words, options) => {
     },
     getProgress: () => progress.get()
   };
+};
+
+export const createObservableQuizWithSteps = (words, steps, options) => {
+  return Object.assign(
+    {
+      get progress() {
+        return {
+          max:
+            words.length * this.steps.length +
+            (options.retryErrors ? this.errors.length : 0),
+          results: this.results.map(({ result }) => result)
+        };
+      },
+      get validator() {
+        return (
+          this["step"].validator ||
+          function(question, input) {
+            return question.target === input;
+          }
+        );
+      }
+    },
+    {
+      started: false,
+      done: false,
+      paused: false,
+      cursor: 0,
+      answer: "",
+      steps: arrayIterator(steps),
+      step: {},
+      questions: [],
+      question: {},
+      errors: [],
+      results: [],
+      start() {
+        this.started = true;
+        this.step = this.steps.next();
+        this.questions = createQuestions(words, this.step);
+        this.next();
+      },
+      next() {
+        this.paused = false;
+        this.answer = "";
+        this.setNextQuestion();
+      },
+      setNextQuestion() {
+        if (this.hasMoreQuestions()) {
+          return (this.question = this.questions[this.cursor++]);
+        }
+        if (this.steps.hasMore()) {
+          this.step = this.steps.next();
+          this.questions = createQuestions(words, this.step);
+          this.cursor = 0;
+          return (this.question = this.questions[this.cursor++]);
+        }
+        if (options.onComplete) {
+          options.onComplete();
+        }
+        this.done = true;
+      },
+      validate() {
+        const result = this.validator(this.question, this.answer);
+        this.results.push({
+          ...this.question,
+          result
+        });
+        options.afterValidation(this.question, result, this.answer);
+        result ? this.handleSuccess() : this.handleFailure();
+      },
+      handleFailure() {
+        this.paused = true;
+        this.errors.push(this.question);
+        if (options.retryErrors) {
+          this.questions.push(this.question);
+        }
+      },
+      handleSuccess() {
+        this.next();
+      },
+      hasMoreQuestions() {
+        return this.cursor < this.questions.length;
+      },
+      hasErrors() {
+        return this.errors.length > 0;
+      }
+    }
+  );
 };
 
 export const createObservableQuiz = (words, options) => {

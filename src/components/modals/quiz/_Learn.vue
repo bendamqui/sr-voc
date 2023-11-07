@@ -27,9 +27,9 @@
           </div>
           <qcm
             v-if="isQcm"
-            :question="quiz.question"
+            :question="question"
             :has-error="hasError"
-            @click="quiz.validate"
+            @click="handleSubmit"
             @next="handleNext"
           />
           <quiz-input
@@ -50,13 +50,17 @@ import ProgressBar from "@/components/ProgressBar";
 import Qcm from "@/components/modals/quiz/Qcm";
 import QuizInput from "@/components/modals/quiz/QuizInput";
 
-import { createObservableQuizWithSteps, createQuiz } from "@/modules/quiz";
+import { createQuiz } from "@/modules/quiz";
 import { DIRECTION, QUESTION_TYPE } from "@/modules/quiz/types";
-import { Word, Lesson } from "@/sqlite";
-import { Words } from "@/pouch";
+import { arrayIterator } from "@/utils/iterators";
+import { Result, Word, Lesson } from "@/sqlite";
 
 const saveResult = (question, result) => {
-  console.log(question, result);
+  Result.create({
+    WordId: question.id,
+    type: "learn",
+    result: result
+  });
 };
 
 export default {
@@ -83,19 +87,23 @@ export default {
     },
     isQcm() {
       return (
-        this.quiz.step && this.quiz.step.questionType === QUESTION_TYPE.QCM
+        this.steps.value &&
+        this.steps.value.questionType === QUESTION_TYPE.QCM &&
+        !this.finished
       );
     },
     isInput() {
       return (
-        this.quiz.step && this.quiz.step.questionType === QUESTION_TYPE.INPUT
+        this.steps.value &&
+        this.steps.value.questionType === QUESTION_TYPE.INPUT &&
+        !this.finished
       );
     }
   },
   data() {
     return {
-      steps: [
-        /*{
+      steps: arrayIterator([
+        {
           questionType: QUESTION_TYPE.QCM,
           direction: DIRECTION.TARGET_TO_SOURCE,
           validator: (question, input) => question.target === input,
@@ -106,14 +114,14 @@ export default {
           direction: DIRECTION.SOURCE_TO_TARGET,
           validator: (question, input) => question.target === input,
           afterValidation: saveResult
-        },*/
+        },
         {
           questionType: QUESTION_TYPE.INPUT,
           direction: DIRECTION.SOURCE_TO_TARGET,
           validator: (question, input) => question.target === input,
           afterValidation: saveResult
         }
-      ],
+      ]),
       words: [],
       success: false,
       progress: {
@@ -146,38 +154,16 @@ export default {
   },
   methods: {
     async start() {
-      const { docs } = await Words.find({
-        selector: { lesson_id: this.lessonId },
-        include_docs: true
+      this.words = await Word.findAll({
+        where: { LessonId: this.lessonId },
+        raw: true
       });
-      this.quiz = createObservableQuizWithSteps(docs, [
-        {
-          questionType: QUESTION_TYPE.QCM,
-          direction: DIRECTION.TARGET_TO_SOURCE,
-          validator: (question, input) => question.target === input,
-          afterValidation: saveResult
-        },
-        {
-          questionType: QUESTION_TYPE.QCM,
-          direction: DIRECTION.SOURCE_TO_TARGET,
-          validator: (question, input) => question.target === input,
-          afterValidation: saveResult
-        },
-        {
-          questionType: QUESTION_TYPE.INPUT,
-          direction: DIRECTION.SOURCE_TO_TARGET,
-          validator: (question, input) => question.target === input,
-          afterValidation: saveResult
-        }
-      ]);
-      this.quiz.start();
-      /*this.words = docs;
       this.finished = false;
       this.steps.reset();
       this.progress.reset();
       this.progress.max = this.words.length * this.steps.length;
       this.quiz = createQuiz(this.words, this.steps.next());
-      this.question = this.quiz.next();*/
+      this.question = this.quiz.next();
     },
 
     nextStep() {

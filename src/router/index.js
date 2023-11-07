@@ -20,6 +20,12 @@ const routes = [
         props: true
       },
       {
+        path: "/lessons/:id/learn",
+        name: "learn",
+        component: () => import("@/pages/Lessons/Learn"),
+        props: true
+      },
+      {
         path: "/words",
         name: "words",
         component: () => import("@/pages/Words")
@@ -29,11 +35,7 @@ const routes = [
         name: "difficult",
         component: () => import("@/pages/DifficultWords")
       },
-      {
-        path: "/dictionary",
-        name: "dictionary",
-        component: () => import("@/pages/Dictionary")
-      },
+
       {
         path: "/example",
         name: "example",
@@ -46,23 +48,6 @@ const routes = [
         component: () => import("@/pages/Dashboard")
       },
       {
-        path: "/annotated-texts",
-        name: "annotated-texts",
-        component: () => import("@/pages/AnnotatedTexts")
-      },
-      {
-        path: "/annotated-text",
-        name: "annotated-text",
-        props: true,
-        component: () => import("@/pages/AnnotatedTexts/Text.vue")
-      },
-      {
-        path: "/create-annotated-text",
-        name: "create-annotated-text",
-        props: true,
-        component: () => import("@/pages/AnnotatedTexts/Form.vue")
-      },
-      {
         path: "/texts",
         name: "texts",
         component: () => import("@/pages/Texts")
@@ -71,13 +56,13 @@ const routes = [
         path: "/text",
         name: "text",
         props: true,
-        component: () => import("@/pages/Text")
+        component: () => import("@/pages/Texts/Text.vue")
       },
       {
         path: "/create-text",
         name: "createText",
         props: true,
-        component: () => import("@/pages/CreateText")
+        component: () => import("@/pages/Texts/Form.vue")
       },
       {
         path: "/sandbox",
@@ -93,6 +78,11 @@ const routes = [
         path: "/settings",
         name: "settings",
         component: () => import("@/pages/Settings/index")
+      },
+      {
+        path: "/review",
+        name: "review",
+        component: () => import("@/pages/Review")
       }
     ]
   },

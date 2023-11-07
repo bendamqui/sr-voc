@@ -4,14 +4,13 @@
     <div class="sidebar-sticky">
       <ul class="nav flex-column">
         <li class="nav-item">
-          <a
-            v-b-modal.review-words-modal
-            href="#"
+          <router-link
+            :to="{ name: 'review' }"
             class="btn btn-info text-white nav-link sidebar-button"
             >Review
             <b-badge v-if="wordsToReviewCount > 0" pill variant="danger">
               {{ wordsToReviewCount }}</b-badge
-            ></a
+            ></router-link
           >
         </li>
         <li class="nav-item">
@@ -58,17 +57,7 @@
             Difficult <span class="sr-only">(current)</span>
           </router-link>
         </li>
-        <li class="nav-item">
-          <router-link
-            active-class="active"
-            to="/dictionary"
-            class="nav-link"
-            href="#"
-          >
-            <span data-feather="home"></span>
-            Dictionary <span class="sr-only">(current)</span>
-          </router-link>
-        </li>
+
         <li class="nav-item">
           <router-link
             active-class="active"
@@ -102,17 +91,7 @@
             Settings <span class="sr-only">(current)</span>
           </router-link>
         </li>
-        <li class="nav-item">
-          <router-link
-            active-class="active"
-            to="/annotated-texts"
-            class="nav-link"
-            href="#"
-          >
-            <span data-feather="home"></span>
-            Annotated Texts <span class="sr-only">(current)</span>
-          </router-link>
-        </li>
+
         <li v-if="showSandbox" class="nav-item">
           <router-link
             active-class="active"
