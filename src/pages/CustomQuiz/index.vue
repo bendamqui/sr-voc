@@ -18,15 +18,14 @@
 </template>
 
 <script>
-import { Sequelize } from "sequelize";
 import { DIRECTION, QUESTION_TYPE } from "@/modules/quiz/types";
-import { createObservableQuiz } from "@/modules/quiz";
-import { Word } from "@/sqlite";
+import { createObservableQuizWithSteps } from "@/modules/quiz";
+import { Words } from "@/pouch";
 import QuizInputForm from "@/components/modals/quiz/QuizInputForm";
 import Settings from "@/pages/CustomQuiz/Components/Settings";
 import ProgressBar from "@/pages/CustomQuiz/Components/ProgressBar";
 import Results from "@/pages/CustomQuiz/Components/Results";
-import { Op } from "sequelize";
+import { mapActions } from "vuex";
 
 export default {
   components: { QuizInputForm, Settings, ProgressBar, Results },
@@ -43,24 +42,37 @@ export default {
     };
   },
   methods: {
+    ...mapActions("resultsLog", ["logResult"]),
     async start(settings) {
-      const words = await Word.findAll({
-        where: { level: { [Op.in]: [1, 2] } },
-        limit: settings.questionCount,
-        order: [Sequelize.literal("random()")],
-        raw: true
+      const { docs: words } = await Words.find({
+        selector: {
+          level: { $in: [1, 2, 3] }
+        },
+        limit: parseInt(settings.questionCount)
       });
-      this.quiz = createObservableQuiz(words, {
-        questionType: QUESTION_TYPE.INPUT,
-        direction: settings.direction,
-        retryErrors: settings.retryErrors
-      });
+
+      this.quiz = createObservableQuizWithSteps(
+        words,
+        [
+          {
+            questionType: QUESTION_TYPE.INPUT,
+            direction: settings.direction
+          }
+        ],
+        {
+          afterValidation: this.saveResult,
+          retryErrors: settings.retryErrors
+        }
+      );
       this.quiz.start();
     },
-    handleNumberInput(event) {
-      if (!event.key.match(/[0-9]/)) {
-        event.preventDefault();
-      }
+    async saveResult(question, result, answer) {
+      await this.logResult({
+        _id: question._id,
+        type: "custom",
+        result,
+        answer
+      });
     }
   }
 };

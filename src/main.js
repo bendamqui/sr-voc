@@ -31,6 +31,11 @@ import { Words } from "@/pouch";
       fields: ["level", "last_attempt"]
     }
   });
+  Words.createIndex({
+    index: {
+      fields: ["level"]
+    }
+  });
   await store.dispatch("settings/init");
   await sequelize
     .authenticate()
