@@ -6,6 +6,7 @@
     <ul class="navbar-nav nav-actions px-3">
       <li class="nav-item">
         <b-button
+          disabled
           size="sm"
           @click.prevent="importData"
           variant="warning"
@@ -29,7 +30,7 @@
 
 <script>
 import { version } from "@/../package.json";
-import { ipcRenderer } from "electron";
+//import { ipcRenderer } from "electron";
 import * as fs from "fs";
 import { Lessons, ResultsLog, Words } from "@/pouch";
 export default {
@@ -40,10 +41,10 @@ export default {
   }),
   methods: {
     async importData() {
-      const path = `${ipcRenderer.sendSync("get-user-data-path")}`;
-      await this.importLessons(path);
-      await this.importWords(path);
-      await this.importResults(path);
+      //const path = `${ipcRenderer.sendSync("get-user-data-path")}`;
+      //await this.importLessons(path);
+      //await this.importWords(path);
+      //await this.importResults(path);
     },
     importResults(path) {
       const results = JSON.parse(
